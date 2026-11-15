@@ -76,6 +76,17 @@ Guild Board only talks over the game's guild addon channel, so only your guild s
 It shares level, class, spec, average item level, zone, professions and your note.
 It never shares gold, bags or individual gear. None of these addons contact the internet.
 
+## Want to help?
+
+- **Found a bug or have an idea?** Open an [Issue](../../issues). Say what you typed, what you expected, and what happened. A screenshot helps.
+- **Want to change the code?** Fork this repo (the Fork button at the top), make your change in your copy, and send a pull request. Nothing changes here until it is reviewed and accepted.
+- **Before you send it:** load the addon in game, run the commands you touched, and say in the pull request what you tested.
+- Each addon is one `.lua` file and one `.toc` file. No build tools needed.
+
+## License
+
+MIT. Use it, change it, share it. See [LICENSE](LICENSE).
+
 ## Changes
 
 See [CHANGELOG.md](CHANGELOG.md).
