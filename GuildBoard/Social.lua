@@ -82,7 +82,7 @@ ns.rosterText = function()
     local status = r.online and "online" or (r.daysAway < 1 and "today" or (math.floor(r.daysAway) .. "d ago"))
     local profs = {}
     for p in (m.profs or ""):gmatch("[^,]+") do local pn, rank = p:match("^(.-):(%d+):"); if pn then profs[#profs + 1] = pn .. " " .. rank end end
-    L[#L + 1] = string.format("%s%-14s %2d %-9s %-18s %s%s", indent, nm, r.level, r.class, (r.zone or ""):sub(1, 18), status,
+    L[#L + 1] = string.format("%s%-22s %2d %-8s %-19s %s%s", indent, nm:sub(1, 22), r.level, r.class, (r.zone or ""):sub(1, 19), status,
       (m.ilvl or 0) > 0 and ("  ilvl " .. m.ilvl) or "")
     if #profs > 0 then L[#L + 1] = indent .. "    " .. table.concat(profs, ", ") end
     if m.note and m.note ~= "" then L[#L + 1] = indent .. "    Note: " .. m.note end
@@ -96,8 +96,12 @@ ns.rosterText = function()
   for key, m in pairs(addon) do
     for p in (m.profs or ""):gmatch("[^,]+") do
       local pn, rank = p:match("^(.-):(%d+):")
-      if pn and roster[short(key)] and active(roster[short(key)]) then byProf[pn] = byProf[pn] or {}; table.insert(byProf[pn], short(key) .. " " .. rank) end
+      if pn and roster[short(key)] and active(roster[short(key)]) then byProf[pn] = byProf[pn] or {}; table.insert(byProf[pn], { short(key), tonumber(rank) }) end
     end
+  end
+  for pn, list in pairs(byProf) do
+    table.sort(list, function(a, b) return a[2] > b[2] end)
+    for i, x in ipairs(list) do list[i] = x[1] .. " " .. x[2] end
   end
   local names = {}
   for pn in pairs(byProf) do names[#names + 1] = pn end
@@ -134,8 +138,9 @@ local function raceText()
   local avg = sum / n
   local L = { "", string.format("LEVEL RACE (group average %.1f)", avg) }
   local parts, behind = {}, {}
+  local mine = UnitName("player")
   for i, r in ipairs(rows) do
-    parts[#parts + 1] = i .. ". " .. r.nm .. " " .. r.lv
+    if i <= 5 or r.nm == mine then parts[#parts + 1] = i .. ". " .. r.nm .. " " .. r.lv end
     if r.lv <= avg - 3 then behind[#behind + 1] = r.nm .. " (" .. r.lv .. ")" end
   end
   L[#L + 1] = table.concat(parts, "   ")
@@ -192,7 +197,7 @@ local function sharedText()
     end
     if #who > 0 then any = true; table.sort(who); L[#L + 1] = title .. ": " .. table.concat(who, ", ") end
   end
-  if not any then L[#L + 1] = "nobody else is on your quests right now" end
+  if not any then L[#L + 1] = "nobody else with the addon is on your quests right now" end
   return table.concat(L, "\n")
 end
 

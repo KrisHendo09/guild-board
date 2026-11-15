@@ -126,6 +126,8 @@ end
 
 local function onMessage(prefix, msg, channel, sender)
   if prefix ~= PREFIX or channel ~= "GUILD" then return end
+  -- the guild channel echoes our own messages back; file them under the same key everything else uses for "me"
+  if ns.me and sender and sender:gsub("%-.*$", "") == UnitName("player") then sender = ns.me() end
   local kind, rest = msg:match("^(%u)%^?(.*)$")
   local f = { strsplit(SEP, rest or "") }
   if kind == "D" then

@@ -93,6 +93,16 @@ local function repair()
       for who, v in pairs(db[k]) do if type(v) ~= "table" then db[k][who] = nil; fixed = fixed + 1 end end
     end
   end
+  -- drop copies of our own data filed under a different name format (older versions did this)
+  local mine = UnitName and UnitName("player")
+  if mine and ns.me then
+    local key = ns.me()
+    for _, k in ipairs({ "needs", "crafts", "gear", "wants", "quests", "hearths" }) do
+      if db[k] then
+        for who in pairs(db[k]) do if who ~= key and who:gsub("%-.*$", "") == mine then db[k][who] = nil end end
+      end
+    end
+  end
   -- prune anything nobody has refreshed in 60 days
   local cutoff = time() - 60 * 86400
   for _, k in ipairs({ "members", "needs", "crafts", "gear", "wants", "quests", "hearths" }) do
