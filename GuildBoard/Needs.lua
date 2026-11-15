@@ -166,11 +166,37 @@ end
 local told
 ns.handlers.V = function(sender, f)
   local theirs = f[1]
+  if theirs and sender then
+    GuildBoardDB.versions = GuildBoardDB.versions or {}
+    GuildBoardDB.versions[sender] = { v = theirs, at = time() }
+  end
   if told or not theirs or not newer(theirs, myVersion()) then return end
   told = true
   C_Timer.After(8, function()
     print(GREEN .. "Guild Board|r: " .. short(sender) .. " has version " .. theirs .. " (you have " .. myVersion() .. "). Update from the link pinned in #addons: github.com/KrisHendo09/guild-board/releases/latest")
   end)
+end
+
+-- /gb versions: who is on which version. Anyone we have roster data for but no version ping is on 1.2 or older.
+ns.versionsText = function()
+  local mine = myVersion(); local seen, rows = {}, {}
+  GuildBoardDB.versions = GuildBoardDB.versions or {}
+  GuildBoardDB.versions[me()] = { v = mine, at = time() }
+  for who, r in pairs(GuildBoardDB.versions) do seen[who] = true; rows[#rows + 1] = { who = who, v = r.v, at = r.at } end
+  for who, m in pairs(GuildBoardDB.members or {}) do
+    if not seen[who] and type(m) == "table" and (time() - (m.ts or 0)) < 14 * 86400 then rows[#rows + 1] = { who = who, v = "1.2 or older", at = m.ts or 0 } end
+  end
+  table.sort(rows, function(a, b) if a.v ~= b.v then return newer(a.v, b.v) end return a.who < b.who end)
+  local top = mine
+  for _, r in ipairs(rows) do if r.v ~= "1.2 or older" and newer(r.v, top) then top = r.v end end
+  local out, n = { "Guild Board versions (newest is " .. top .. ")", "" }, 0
+  for _, r in ipairs(rows) do
+    local ok = r.v == top
+    out[#out + 1] = (ok and "|cff33ff99" or "|cffff7733") .. short(r.who) .. "|r  " .. r.v
+    if ok then n = n + 1 end
+  end
+  out[#out + 1] = ""; out[#out + 1] = n .. " of " .. #rows .. " up to date. Only guildies seen online since they updated show up."
+  return table.concat(out, "\n")
 end
 
 ns.me, ns.short, ns.db, ns.itemName = me, short, db, itemName

@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- `/gb versions` shows which guildies are on which version (green = newest, orange = needs to update).
+
 ## Guild Board
 
 ### 1.3.1 (2026-11-15)
