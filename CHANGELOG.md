@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Out of date? The addon now nags you on screen with a raid warning at login and every 45 minutes until you update.
 - `/gb versions` shows which guildies are on which version (green = newest, orange = needs to update).
 
 ## Guild Board

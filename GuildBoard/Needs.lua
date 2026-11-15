@@ -163,18 +163,32 @@ local function newer(a, b)   -- is version a newer than b
   end
   return false
 end
-local told
+-- update nag: once anyone in the guild is seen on a newer version, this copy nags its owner on screen
+-- right away, at every login, and every 45 minutes until they update. Remembered across sessions.
+local nagTicker
+local function nag()
+  local newest = GuildBoardDB.newestSeen
+  if not newest or not newer(newest, myVersion()) then GuildBoardDB.newestSeen = nil; return end
+  local msg = "Guild Board " .. newest .. " is out. You have " .. myVersion() .. ". Grab it from the pin in #addons"
+  if RaidNotice_AddMessage and RaidWarningFrame then RaidNotice_AddMessage(RaidWarningFrame, msg, { r = 1, g = 0.45, b = 0.2 }) end
+  if PlaySound and SOUNDKIT and SOUNDKIT.RAID_WARNING then pcall(PlaySound, SOUNDKIT.RAID_WARNING) end
+  print("|cffff7733Guild Board|r: " .. msg .. ": github.com/KrisHendo09/guild-board/releases/latest")
+end
+local function startNag(delay)
+  if nagTicker then return end
+  C_Timer.After(delay or 8, function() pcall(nag) end)
+  nagTicker = C_Timer.NewTicker(45 * 60, function() pcall(nag) end)
+end
+ns.startNag = function() if GuildBoardDB.newestSeen then startNag(20) end end
 ns.handlers.V = function(sender, f)
   local theirs = f[1]
-  if theirs and sender then
-    GuildBoardDB.versions = GuildBoardDB.versions or {}
-    GuildBoardDB.versions[sender] = { v = theirs, at = time() }
+  if not theirs or not sender then return end
+  GuildBoardDB.versions = GuildBoardDB.versions or {}
+  GuildBoardDB.versions[sender] = { v = theirs, at = time() }
+  if newer(theirs, myVersion()) and (not GuildBoardDB.newestSeen or newer(theirs, GuildBoardDB.newestSeen)) then
+    GuildBoardDB.newestSeen = theirs
   end
-  if told or not theirs or not newer(theirs, myVersion()) then return end
-  told = true
-  C_Timer.After(8, function()
-    print(GREEN .. "Guild Board|r: " .. short(sender) .. " has version " .. theirs .. " (you have " .. myVersion() .. "). Update from the link pinned in #addons: github.com/KrisHendo09/guild-board/releases/latest")
-  end)
+  if GuildBoardDB.newestSeen then startNag(8) end
 end
 
 -- /gb versions: who is on which version. Anyone we have roster data for but no version ping is on 1.2 or older.
@@ -354,7 +368,7 @@ end
 local bagTimer, scanTimer
 ev:SetScript("OnEvent", ns.guard("needs", function(_, e)
   if e == "PLAYER_LOGIN" then
-    db(); pcall(hookTooltips); pcall(hookClicks)
+    db(); pcall(hookTooltips); pcall(hookClicks); pcall(ns.startNag)
   elseif e == "BAG_UPDATE_DELAYED" then
     if bagTimer then return end
     bagTimer = true
