@@ -102,9 +102,19 @@ def week_gains(rows, now):
 
 def render(data, min_panels=0):
     from PIL import Image, ImageDraw, ImageFont
-    FD = '/usr/share/fonts/truetype/dejavu/'
-    def F(size, bold=False): return ImageFont.truetype(FD + ('DejaVuSans-Bold.ttf' if bold else 'DejaVuSans.ttf'), size)
-    W = 1200; M = 56; BG = '#111318'; TXT = '#EDEFF2'; MUTE = '#9AA3B2'; GOLD = '#E0B36A'; LINE = '#3A3F4A'
+    GF = os.path.join(HERE, 'art', 'fonts') + os.sep      # Poppins (OFL) ships in the repo so GitHub draws the same thing
+    _fc = {}
+    def F(size, w='Regular'):
+        w = {'SemiBold': 'Bold'}.get(w, w)
+        k = (size, w)
+        if k not in _fc:
+            try: _fc[k] = ImageFont.truetype(GF + f'Poppins-{w}.ttf', size)
+            except OSError: _fc[k] = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans' + ('-Bold' if w in ('Bold', 'SemiBold') else '') + '.ttf', size)
+        return _fc[k]
+    # every panel is the painted board at its own 3:2 shape, so the frame, banner and torches always line up
+    W, H = 1200, 800
+    X0, X1, Y0, Y1 = 58, 1142, 214, 748        # inside the iron frame, below the banner and torches
+    BG = '#111318'; TXT = '#F1E9DA'; MUTE = '#A79C8A'; GOLD = '#E8B964'
     rows = data['members']; now = data['at']
     try:
         from zoneinfo import ZoneInfo
@@ -113,7 +123,7 @@ def render(data, min_panels=0):
         stamp = datetime.fromtimestamp(now, timezone.utc).strftime('%b %d, %H:%M UTC')
 
     ART = os.path.join(HERE, 'art', 'board_bg.png')
-    art = Image.open(ART).convert('RGB') if os.path.exists(ART) else None
+    art = Image.open(ART).convert('RGBA').resize((W, H), Image.LANCZOS) if os.path.exists(ART) else None
 
     def seen(ms):
         if not ms: return ''
@@ -125,104 +135,97 @@ def render(data, min_panels=0):
         while s and d.textlength(s + '…', font=font) > width: s = s[:-1]
         return s + '…'
 
-    def canvas(h):
-        # painted background (tools/art/board_bg.png, made once in ChatGPT) cropped to fit; plain dark without it
-        if not art: return Image.new('RGBA', (W, h), BG)
-        aw, ah = art.size; sc = max(W / aw, h / ah)
-        bg = art.resize((int(aw * sc) + 1, int(ah * sc) + 1), Image.LANCZOS)
-        x0 = (bg.width - W) // 2; y0 = (bg.height - h) // 2
-        return bg.crop((x0, y0, x0 + W, y0 + h)).convert('RGBA')
+    def canvas():
+        return art.copy() if art else Image.new('RGBA', (W, H), BG)
 
-    def panel(im, box, alpha=185, radius=12, outline=None):
+    def panel(im, box, alpha=200, radius=10, outline=None):
         ov = Image.new('RGBA', im.size, (0, 0, 0, 0)); od = ImageDraw.Draw(ov)
-        od.rounded_rectangle(box, radius, fill=(10, 11, 15, alpha), outline=outline)
+        od.rounded_rectangle(box, radius, fill=(12, 9, 7, alpha), outline=outline, width=1)
         return Image.alpha_composite(im, ov)
 
-    def text(d, xy, s, font, fill, anchor='la'):
+    def text(d, xy, s, font, fill, anchor='lm'):
         x, y = xy
-        d.text((x + 2, y + 2), s, font=font, fill=(0, 0, 0, 200), anchor=anchor)
+        d.text((x + 1, y + 2), s, font=font, fill=(0, 0, 0, 220), anchor=anchor)
         d.text((x, y), s, font=font, fill=fill, anchor=anchor)
 
     def header(im, title, sub):
-        im = panel(im, [M - 16, 26, W - M + 16, 118], alpha=150, radius=14)
         d = ImageDraw.Draw(im)
-        text(d, (M + 4, 34), title, F(40, True), TXT)
-        text(d, (M + 6, 84), sub, F(19), MUTE)
-        t = 'Updated ' + stamp; text(d, (W - M - 4, 88), t, F(17), MUTE, 'ra')
-        d.rectangle([M - 16, 122, W - M + 16, 125], fill=GOLD)
+        text(d, (W // 2, 98), title, F(38, 'Bold'), GOLD, 'mm')
+        text(d, (W // 2, 140), f'{sub}  ·  updated {stamp}', F(16, 'Medium'), MUTE, 'mm')
         return im, d
 
     panels = []
-    # ---- crafting board: 4 columns, top 3 per profession, same shape as the roster panels
+    # ---- crafting board: 4 x 3 cards, top 3 per profession
     profs = CRAFT + GATHER + SECOND
     kind = {**{p: 'Crafting' for p in CRAFT}, **{p: 'Gathering' for p in GATHER}, **{p: 'Everyday' for p in SECOND}}
     by = {}
     for r in rows:
         for p, v in r['skills'].items(): by.setdefault(p, []).append((v, r['name'], r['cls']))
-    cols = 4; gap = 16; TOP = 3; lh = 32
-    cw = (W - 2 * M - gap * (cols - 1)) // cols; ch = 58 + TOP * lh + 10
+    cols = 4; gap = 14; TOP = 3; lh = 31
     nrow = (len(profs) + cols - 1) // cols
-    Hh = 140 + nrow * (ch + gap) + 40
-    im = canvas(Hh)
-    im, d = header(im, f"{data['guild']}: Who Can Make What", f"{data['faction']} · {len(rows)} members · top {TOP} per profession, skill out of {MAXSKILL}")
+    cw = (X1 - X0 - gap * (cols - 1)) / cols; ch = (Y1 - Y0 - gap * (nrow - 1)) / nrow
+    im = canvas()
+    im, d = header(im, 'Who Can Make What', f"{data['guild']}  ·  {len(rows)} members  ·  top {TOP}, skill out of {MAXSKILL}")
     for i, p in enumerate(profs):
-        cx = M + (i % cols) * (cw + gap); cy = 140 + (i // cols) * (ch + gap)
-        im = panel(im, [cx, cy, cx + cw, cy + ch], alpha=190, outline=(224, 179, 106, 90))
+        cx = int(X0 + (i % cols) * (cw + gap)); cy = int(Y0 + (i // cols) * (ch + gap)); cx2 = int(cx + cw); cy2 = int(cy + ch)
+        im = panel(im, [cx, cy, cx2, cy2], outline=(232, 185, 100, 110))
         d = ImageDraw.Draw(im)
         who = sorted(by.get(p, []), reverse=True)
-        text(d, (cx + 14, cy + 12), p, F(21, True), TXT)
-        text(d, (cx + 14, cy + 38), kind[p].upper() + (f'  ·  {len(who)} in guild' if who else '  ·  nobody yet'), F(12, True), GOLD)
+        text(d, (cx + 16, cy + 24), p, F(20, 'SemiBold'), TXT)
+        text(d, (cx + 16, cy + 50), kind[p].upper() + (f'  ·  {len(who)} in guild' if who else '  ·  nobody yet'), F(11, 'SemiBold'), GOLD)
+        d.line([cx + 16, cy + 64, cx2 - 16, cy + 64], fill=(232, 185, 100, 70))
         for j, (v, name, cls) in enumerate(who[:TOP]):
-            ly = cy + 62 + j * lh
-            text(d, (cx + 14, ly), fit(d, name, F(16), cw - 66), F(16), CLASS_COLOR.get(cls, TXT))
-            text(d, (cx + cw - 12, ly), str(v), F(17, True), GOLD, 'ra')
+            ly = cy + 86 + j * lh
+            text(d, (cx + 16, ly), fit(d, name, F(16, 'Medium'), cw - 80), F(16, 'Medium'), CLASS_COLOR.get(cls, TXT))
+            text(d, (cx2 - 16, ly), str(v), F(16, 'Bold'), GOLD, 'rm')
     panels.append(('guild_crafting.png', im))
 
     # ---- roster panels (anyone offline 7+ days is hidden until they log back in)
     AWAY = 7 * 86400
     hidden = [r for r in rows if r['seen'] and now - r['seen'] / 1000 >= AWAY]
     rows = [r for r in rows if r not in hidden]
-    away_note = f", {len(hidden)} away 7+ days hidden" if hidden else ""
+    away_note = f"  ·  {len(hidden)} away 7+ days hidden" if hidden else ""
     gains = week_gains(rows, now)
-    PER = 10; rh = 50
+    PER = 10; hh = 30; rh = (Y1 - Y0 - hh) // PER
     chunks = [rows[i:i + PER] for i in range(0, len(rows), PER)] or [[]]
-    X = {'name': M + 18, 'lvl': 470, 'cls': 492, 'ilvl': 676, 'dung': 700, 'week': 1004, 'seen': W - M - 14}
+    X = {'name': X0 + 20, 'lvl': 430, 'cls': 452, 'ilvl': 652, 'dung': 678, 'week': 1010, 'seen': X1 - 14}
     for ci, chunk in enumerate(chunks):
-        Hh = 140 + 36 + PER * rh + 36       # every roster panel is the same height, so Discord shows them the same size
-        im = canvas(Hh)
+        im = canvas()
         a = ci * PER + 1
-        im, d = header(im, f"{data['guild']} Roster", f"Members {a} to {a + max(len(chunk), 1) - 1} of {len(rows)}, highest level first{away_note}")
-        y = 140
-        for label, x, anc in (('NAME', X['name'], 'la'), ('LVL', X['lvl'], 'ra'), ('CLASS', X['cls'], 'la'), ('ILVL', X['ilvl'], 'ra'),
-                              ('DUNGEONS IN RANGE', X['dung'], 'la'), ('THIS WEEK', X['week'], 'ra'), ('LAST SEEN', X['seen'], 'ra')):
-            text(d, (x, y + 6), label, F(14, True), GOLD, anc)
-        y += 34
+        im, d = header(im, 'Guild Roster', f"Members {a} to {a + max(len(chunk), 1) - 1} of {len(rows)}{away_note}")
+        y = Y0
+        for label, x, anc in (('NAME', X['name'], 'lm'), ('LVL', X['lvl'], 'rm'), ('CLASS', X['cls'], 'lm'), ('ILVL', X['ilvl'], 'rm'),
+                              ('DUNGEONS IN RANGE', X['dung'], 'lm'), ('THIS WEEK', X['week'], 'rm'), ('LAST SEEN', X['seen'], 'rm')):
+            text(d, (x, y + hh // 2), label, F(12, 'SemiBold'), GOLD, anc)
+        y += hh
         for i, r in enumerate(chunk):
             col = CLASS_COLOR.get(r['cls'], TXT)
-            im = panel(im, [M - 6, y, W - M + 6, y + rh - 6], alpha=200 if i % 2 == 0 else 170, radius=8)
+            im = panel(im, [X0, y + 2, X1, y + rh - 3], alpha=215 if i % 2 == 0 else 185, radius=7)
             d = ImageDraw.Draw(im)
-            d.rounded_rectangle([M - 6, y, M, y + rh - 6], 3, fill=col)
-            nm = fit(d, r['name'], F(21, True), 330); text(d, (X['name'], y + 11), nm, F(21, True), col)
+            d.rounded_rectangle([X0, y + 2, X0 + 5, y + rh - 3], 2, fill=col)
+            m = y + rh // 2
+            nm = fit(d, r['name'], F(19, 'SemiBold'), 300); text(d, (X['name'], m), nm, F(19, 'SemiBold'), col)
             if r['rank'] == 0:
-                tx = X['name'] + d.textlength(nm, font=F(21, True)) + 10
-                d.rounded_rectangle([tx, y + 12, tx + 40, y + 33], 5, fill=GOLD); d.text((tx + 7, y + 14), 'GM', font=F(14, True), fill='#111318')
-            text(d, (X['lvl'], y + 10), str(r['level']), F(22, True), TXT, 'ra')
-            text(d, (X['cls'], y + 13), fit(d, (r['race'] + ' ' + r['cls']).strip(), F(17), 165), F(17), MUTE)
-            text(d, (X['ilvl'], y + 12), str(r['ilvl'] or '-'), F(18), TXT, 'ra')
+                tx = X['name'] + d.textlength(nm, font=F(19, 'SemiBold')) + 10
+                d.rounded_rectangle([tx, m - 11, tx + 38, m + 11], 5, fill=GOLD); d.text((tx + 19, m + 1), 'GM', font=F(12, 'Bold'), fill='#111318', anchor='mm')
+            text(d, (X['lvl'], m), str(r['level']), F(19, 'Bold'), TXT, 'rm')
+            text(d, (X['cls'], m), fit(d, (r['race'] + ' ' + r['cls']).strip(), F(15), 180), F(15), MUTE)
+            text(d, (X['ilvl'], m), str(r['ilvl'] or '-'), F(16, 'Medium'), TXT, 'rm')
             dz = dungeons_for(r['level'])
             dtxt = ', '.join(dz) if dz else ('too low yet' if r['level'] < 13 else 'none')
-            text(d, (X['dung'], y + 13), fit(d, dtxt, F(17), X['week'] - X['dung'] - 95), F(17), TXT if dz else MUTE)
+            text(d, (X['dung'], m), fit(d, dtxt, F(15), X['week'] - X['dung'] - 100), F(15), TXT if dz else MUTE)
             g = gains.get(r['name']); gt = '-' if g is None else (f'+{g}' if g > 0 else '0')
-            text(d, (X['week'], y + 12), gt, F(19, True), GOLD if (g or 0) > 0 else MUTE, 'ra')
-            text(d, (X['seen'], y + 14), seen(r['seen']), F(16), MUTE, 'ra')
+            text(d, (X['week'], m), gt, F(17, 'Bold'), GOLD if (g or 0) > 0 else MUTE, 'rm')
+            text(d, (X['seen'], m), seen(r['seen']), F(14), MUTE, 'rm')
             y += rh
         panels.append((f'guild_roster_{ci + 1}.png', im))
 
-    # keep the same number of Discord posts when the roster shrinks: fill spare posts with a short note
+    # keep the same number of Discord posts when the roster shrinks: same-size board with a short note
     n = len(panels)
     while len(panels) < min_panels:
-        im = canvas(300)
-        im, d = header(im, f"{data['guild']} Roster", f"That's everyone active this week{away_note}.")
+        im = canvas()
+        im, d = header(im, 'Guild Roster', f"{len(rows)} active{away_note}")
+        text(d, (W // 2, (Y0 + Y1) // 2), "That's everyone active this week.", F(26, 'SemiBold'), MUTE, 'mm')
         panels.append((f'guild_roster_spare_{len(panels) - n + 1}.png', im))
     paths = []
     for name, im in panels:
