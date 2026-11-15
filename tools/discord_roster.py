@@ -13,7 +13,7 @@ CLASS_COLOR = {"Warrior": 0xC69B6D, "Paladin": 0xF48CBA, "Hunter": 0xAAD372, "Ro
 
 def seen(ts):
     if not ts:
-        return "unknown"
+        return "-"
     h = int((time.time() - (ts or 0)) / 3600)
     return "now" if h < 1 else f"{h}h ago" if h < 48 else f"{h // 24}d ago"
 
@@ -25,34 +25,40 @@ def profs_of(m):
             out.append((parts[0], int(parts[1])))
     return out
 
+def cut(t, n):
+    t = str(t or "")
+    return t if len(t) <= n else t[:n - 1] + "."
+
 def build(members, guild):
     rows = sorted(members.items(), key=lambda kv: (-(kv[1].get("level") or 0), kv[0]))
-    by_prof, fields = {}, []
+    by_prof, notes, lines = {}, [], []
+    lines.append(f"{'Name':<18} {'Lv':>2}  {'Class':<8} {'Zone':<12} Seen")
+    lines.append("-" * 50)
     for key, m in rows:
         name = key.split("-")[0]
-        cls = m.get("class") or "?"
         spec = m.get("spec") or ""
-        what = f"{spec} {cls}" if spec and spec != cls else cls
-        ps = profs_of(m)
-        for pn, rank in ps:
+        cls = m.get("class") or "?"
+        what = spec if spec and spec != cls else cls
+        lines.append(f"{cut(name, 18):<18} {m.get('level', 0):>2}  {cut(what, 8):<8} {cut(m.get('zone') or '-', 12):<12} {seen(m.get('ts'))}")
+        for pn, rank in profs_of(m):
             by_prof.setdefault(pn, []).append((name, rank))
-        lines = [f"Lv **{m.get('level', 0)}** {what}" + (f"  ·  ilvl {m['ilvl']}" if m.get("ilvl") else ""),
-                 f"📍 {m.get('zone') or 'unknown'}  ·  seen {seen(m.get('ts'))}",
-                 "🛠 " + (", ".join(f"{p} {r}" for p, r in ps) if ps else "no professions")]
         if m.get("note"):
-            lines.append(f"📝 {m['note']}")
-        fields.append({"name": name, "value": "\n".join(lines)[:1024], "inline": True})
+            notes.append(f"**{name}**: {m['note']}")
+    desc = f"**{len(rows)} members reporting**\n```\n" + "\n".join(lines) + "\n```"
+    fields = []
     if by_prof:
-        txt = "\n".join(f"**{p}**: " + ", ".join(f"{n} ({r})" for n, r in sorted(v, key=lambda x: -x[1]))
+        w = max(len(p) for p in by_prof)
+        txt = "\n".join(f"{p:<{w}}  " + ", ".join(f"{n} {r}" for n, r in sorted(v, key=lambda x: -x[1]))
                         for p, v in sorted(by_prof.items()))
-        fields.append({"name": "Who can make what", "value": txt[:1024], "inline": False})
-    top_cls = rows[0][1].get("class") if rows else None
+        fields.append({"name": "Crafters", "value": ("```\n" + txt)[:1016] + "\n```", "inline": False})
+    if notes:
+        fields.append({"name": "Notes", "value": "\n".join(notes)[:1024], "inline": False})
     return {"username": "Guild Board", "embeds": [{
         "title": f"{guild} roster",
-        "description": f"{len(rows)} members reporting. Get the addon in #addons.",
-        "color": CLASS_COLOR.get(top_cls, 0x5865F2),
-        "fields": fields[:25],
-        "footer": {"text": "Guild Board · updates when someone syncs"},
+        "description": desc[:4096],
+        "color": 0x5865F2,
+        "fields": fields,
+        "footer": {"text": "Install Guild Board from #addons · type /gb in game"},
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}],
         "allowed_mentions": {"parse": []}}
 
