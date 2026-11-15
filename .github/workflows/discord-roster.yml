@@ -1,6 +1,6 @@
 # Posts or updates the Guild Board roster card in Discord through a channel webhook.
 # Run it from the Actions tab or the API with the roster JSON from tools/roster_json.py.
-# The webhook URL lives in the repo secret DISCORD_WEBHOOK_URL and is never printed.
+# The webhook URL lives in the repo secret GUILD_BOARD (or DISCORD_WEBHOOK_URL) and is never printed.
 name: Discord roster
 on:
   workflow_dispatch:
@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Post roster card
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.GUILD_BOARD }}
           ROSTER_JSON: ${{ inputs.roster }}
           MESSAGE_ID: ${{ inputs.message_id }}
           GUILD_NAME: ${{ inputs.guild_name }}
