@@ -70,30 +70,54 @@ def build(members, guild):
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}],
         "allowed_mentions": {"parse": []}}
 
-def send(url, payload, msg_id):
+def send(url, payload, msg_id, png=None):
+    if png:
+        payload = dict(payload, attachments=[{"id": 0, "filename": "roster.png"}])
+        b = "----guildboard" + str(int(time.time() * 1000))
+        body = (f"--{b}\r\nContent-Disposition: form-data; name=\"payload_json\"\r\nContent-Type: application/json\r\n\r\n"
+                + json.dumps(payload) + f"\r\n--{b}\r\nContent-Disposition: form-data; name=\"files[0]\"; filename=\"roster.png\"\r\n"
+                  "Content-Type: image/png\r\n\r\n").encode() + png + f"\r\n--{b}--\r\n".encode()
+        ctype = f"multipart/form-data; boundary={b}"
+    else:
+        body, ctype = json.dumps(payload).encode(), "application/json"
     if msg_id:
         req = urllib.request.Request(f"{url}/messages/{msg_id}", method="PATCH")
     else:
         req = urllib.request.Request(f"{url}?wait=true", method="POST")
-    req.add_header("Content-Type", "application/json")
+    req.add_header("Content-Type", ctype)
     req.add_header("User-Agent", "GuildBoard (github.com/KrisHendo09/guild-board, 1.0)")
-    with urllib.request.urlopen(req, json.dumps(payload).encode()) as r:
+    with urllib.request.urlopen(req, body) as r:
         return json.load(r)["id"]
+
+def image_payload(members, guild):
+    n = len(members)
+    return {"username": "Guild Board", "content": "", "embeds": [{
+        "color": 0xE6B450, "image": {"url": "attachment://roster.png"},
+        "footer": {"text": f"{n} members reporting · install Guild Board from #addons · /gb in game"}}],
+        "allowed_mentions": {"parse": []}}
 
 if __name__ == "__main__":
     members = json.loads(os.environ.get("ROSTER_JSON") or "{}")
-    payload = build(members, os.environ.get("GUILD_NAME") or "Guild")
+    guild = os.environ.get("GUILD_NAME") or "Guild"
+    png = None
+    try:
+        import io, roster_image
+        buf = io.BytesIO(); roster_image.render(members, guild, buf); png = buf.getvalue()
+        payload = image_payload(members, guild)
+    except Exception as e:
+        print(f"image skipped ({e}); posting text card")
+        payload = build(members, guild)
     if "--dry" in sys.argv:
-        print(json.dumps(payload, indent=2)); sys.exit(0)
+        print(json.dumps(payload, indent=2)[:400], "png bytes:", len(png or b"")); sys.exit(0)
     url = (os.environ.get("DISCORD_WEBHOOK_URL") or "").strip()
     if not url.startswith("https://"):
         print("DISCORD_WEBHOOK_URL is empty or not a URL. Add it under Settings > Secrets and variables > Actions > Repository secrets."); sys.exit(1)
     msg_id = (os.environ.get("MESSAGE_ID") or "").strip()
     try:
-        new_id = send(url, payload, msg_id)
+        new_id = send(url, payload, msg_id, png)
     except urllib.error.HTTPError as e:
         if msg_id and e.code == 404:  # old message deleted, post a fresh one
-            new_id = send(url, payload, "")
+            new_id = send(url, payload, "", png)
         else:
             print(f"Discord error {e.code}: {e.read()[:300].decode(errors='replace')}"); sys.exit(1)
     print(f"message_id={new_id}")

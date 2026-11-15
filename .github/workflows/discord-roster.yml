@@ -23,10 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install Pillow
+        run: pip install --quiet pillow
       - name: Post roster card
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.GUILD_BOARD }}
           ROSTER_JSON: ${{ inputs.roster }}
           MESSAGE_ID: ${{ inputs.message_id }}
           GUILD_NAME: ${{ inputs.guild_name }}
-        run: python3 tools/discord_roster.py
+        run: python tools/discord_roster.py
