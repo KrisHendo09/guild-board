@@ -378,6 +378,7 @@ local function toggleMenu(anchor)
     local items = {
       { "Tracker", function() if ns.toggleTracker then ns.toggleTracker() end end },
       { "Party tab", function() if ns.partySync then ns.partySync() end end },
+      { "Sync guild", function() if ns.syncGuild then ns.syncGuild() end end },
       { "Guild window", function() SlashCmdList["GUILDBOARD"]("") end },
       { "Character Card", function() if ns.paste then ns.paste() end end },
     }

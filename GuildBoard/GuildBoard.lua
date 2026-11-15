@@ -110,6 +110,12 @@ local function store(key, class, level, zone, profs, note, ts, via, spec, ilvl, 
     spec = spec or "", ilvl = tonumber(ilvl) or 0, dps = tonumber(dps) or 0 }
 end
 
+-- "Sync guild" (minimap menu or /gb sync): everyone online with the addon resends their info right away
+ns.syncGuild = function()
+  pcall(broadcastSelf); send("R")
+  print("|cff33ff99Guild Board|r: asked everyone online to resend. Give it about 15 seconds.")
+end
+
 local function shareKnown()
   -- after a random wait, pass along what we know about members who are not online to say it themselves
   local delay = 3 + math.random() * 8
@@ -266,7 +272,7 @@ local function show(text)
     frame:EnableMouse(true); frame:SetMovable(true); frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", frame.StartMoving); frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
     local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    title:SetPoint("TOP", 0, -10); title:SetText("Guild Board: Ctrl+C copies it for Discord. Esc closes.")
+    title:SetPoint("TOP", 0, -10); title:SetText("Guild Board  (the Discord board updates on its own)   Esc closes")
     local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton"); close:SetPoint("TOPRIGHT", 2, 2)
     local scroll = CreateFrame("ScrollFrame", "GuildBoardScroll", frame, "UIPanelScrollFrameTemplate")
     scroll:SetPoint("TOPLEFT", 12, -32); scroll:SetPoint("BOTTOMRIGHT", -32, 12)
@@ -357,8 +363,7 @@ SlashCmdList["GUILDBOARD"] = function(arg)
     if rest == "" then print("|cff33ff99Guild Board|r: features are needs, crafts, upgrades, mats, dungeons, quests, deaths, dings, hearths, partycheck")
     else ns.setFeature(rest:lower(), cmd == "enable") end
   elseif cmd == "sync" then
-    pcall(broadcastSelf); send("R")
-    print("|cff33ff99Guild Board|r: asked everyone online to resend. Give it 15 seconds, then /gb")
+    ns.syncGuild()
   else
     local ok, err = pcall(show)
     if not ok then print("Guild Board error: " .. tostring(err)) end
