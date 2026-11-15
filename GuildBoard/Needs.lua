@@ -8,7 +8,7 @@
 local _, ns = ...
 ns.handlers = ns.handlers or {}
 local SEP = ns.SEP or "^"
-local GOLD, GRAY, GREEN = "|cffffd100", "|cff9d9d9d", "|cff33ff99"
+local GOLD, GRAY, GREEN, BLUE = "|cffffd100", "|cff9d9d9d", "|cff33ff99", "|cff4fa3ff"
 
 local function db()
   GuildBoardDB = GuildBoardDB or {}
@@ -173,8 +173,10 @@ ns.handlers.V = function(sender, f)
   end)
 end
 
+ns.me, ns.short, ns.db, ns.itemName = me, short, db, itemName
 ns.broadcastExtra = function()
   ns.send("V" .. SEP .. myVersion())
+  if ns.broadcastMore then pcall(ns.broadcastMore) end
   broadcastNeeds(true)
   C_Timer.After(4, function() pcall(broadcastCrafts) end)
 end
@@ -197,9 +199,15 @@ local function addLines(tip, id)
     if c.items and c.items[id] and who ~= self then makers[#makers + 1] = short(who) end
   end
   local mineLeft = myRemaining()[id]
-  if #needers > 0 or #makers > 0 or mineLeft then tip:AddLine(" ") end
-  if #needers > 0 then table.sort(needers); tip:AddLine(GOLD .. "Guild needs:|r " .. table.concat(needers, ", "), 1, 1, 1, true) end
-  if mineLeft then tip:AddLine(GOLD .. "You need:|r " .. mineLeft .. GRAY .. "  (Alt+click to change)|r", 1, 1, 1) end
+  local extra = {}
+  for _, fn in ipairs(ns.tipExtras or {}) do
+    local ok, lines = pcall(fn, id)
+    if ok and lines then for _, l in ipairs(lines) do extra[#extra + 1] = l end end
+  end
+  if #needers > 0 or #makers > 0 or mineLeft or #extra > 0 then tip:AddLine(" ") end
+  if #needers > 0 then table.sort(needers); tip:AddLine(BLUE .. "Guild needs:|r " .. table.concat(needers, ", "), 1, 1, 1, true) end
+  if mineLeft then tip:AddLine(BLUE .. "You need:|r " .. mineLeft .. GRAY .. "  (Alt+click to change)|r", 1, 1, 1) end
+  for _, l in ipairs(extra) do tip:AddLine(l, 1, 1, 1, true) end
   if #makers > 0 then table.sort(makers); tip:AddLine(GOLD .. "Guild can make:|r " .. table.concat(makers, ", "), 1, 1, 1, true) end
   if not mineLeft and IsAltKeyDown and IsAltKeyDown() then tip:AddLine(GRAY .. "Alt+click: I need this (Guild Board)|r") end
   tip:Show()

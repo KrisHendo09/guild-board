@@ -176,6 +176,7 @@ local function rosterText()
     for _, w in ipairs(byProf[pn]) do who[#who + 1] = w.name .. " " .. w.rank end
     L[#L + 1] = pn .. ": " .. table.concat(who, ", ")
   end
+  if ns.wantsText then local ok, t = pcall(ns.wantsText); if ok then L[#L + 1] = t end end
   if ns.needsText then local ok, t = pcall(ns.needsText); if ok then L[#L + 1] = t end end
   return table.concat(L, "\n")
 end
