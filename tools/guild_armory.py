@@ -72,6 +72,34 @@ def fetch():
 
 
 # ---------------------------------------------------------------- drawing
+# WoW Forever dungeons and level ranges (warcrafttavern.com, Nov 2026), short names for the roster column
+DUNGEONS = [('RFC', 13, 18), ('Thanes', 13, 20), ('Lordaeron', 15, 22), ('WC', 15, 24), ('DM', 17, 26), ('SFK', 20, 30),
+            ('BFD', 24, 32), ('Stocks', 25, 29), ('Excavation', 26, 33), ('Dalaran', 28, 35), ('RFK', 29, 38), ('Gnomer', 29, 38),
+            ('SM', 30, 46), ('Drowned', 35, 42), ('RFD', 37, 46), ("Krol'dok", 40, 47), ('Ulda', 41, 51), ('ZF', 44, 54),
+            ('Mara', 46, 55), ('Alcaz', 48, 55), ('ST', 50, 60), ('BRD', 52, 60), ('DM East', 54, 60), ('LBRS', 55, 60),
+            ('Blackmaw', 55, 60), ('DM West', 56, 60), ('DM North', 56, 60), ("Shaper's", 58, 60), ('Strat', 58, 60),
+            ('Scholo', 58, 60), ('UBRS', 59, 60)]
+
+def dungeons_for(level):
+    # the three best fits: the in-range dungeons with the highest starting level
+    fits = sorted([(lo, n) for n, lo, hi in DUNGEONS if lo <= level <= hi], reverse=True)[:3]
+    return [n for lo, n in sorted(fits)]
+
+HISTORY = os.path.join(OUT, 'level_history.json')   # kept between runs by the workflow's cache step
+
+def week_gains(rows, now):
+    try: hist = json.load(open(HISTORY))
+    except Exception: hist = {}
+    gains = {}
+    for r in rows:
+        h = [x for x in hist.get(r['name'], []) if now - x[0] <= 8 * 86400]
+        h.append([now, r['level']])
+        hist[r['name']] = h[-200:]
+        week = [lv for t, lv in h if now - t <= 7 * 86400]
+        gains[r['name']] = (r['level'] - min(week)) if len(week) > 1 else None
+    json.dump(hist, open(HISTORY, 'w'))
+    return gains
+
 def render(data, min_panels=0):
     from PIL import Image, ImageDraw, ImageFont
     FD = '/usr/share/fonts/truetype/dejavu/'
@@ -110,7 +138,7 @@ def render(data, min_panels=0):
     nrows = sum((len(g) + cols - 1) // cols for _, g in groups)
     Hh = 107 + sum(46 for _ in groups) + nrows * (ch + gap) + 20
     im = Image.new('RGB', (W, Hh), BG); d = ImageDraw.Draw(im)
-    header(d, f"{data['guild']}: who can make what", f"{data['faction']} · {len(rows)} members · WoW Forever · top {TOP} per profession, skill out of {MAXSKILL}")
+    header(d, f"{data['guild']}: Who Can Make What", f"{data['faction']} · {len(rows)} members · WoW Forever · top {TOP} per profession, skill out of {MAXSKILL}")
     y = 107 + 14
     for gname, profs in groups:
         d.text((36, y + 6), gname.upper(), font=F(18, True), fill=GOLD); y += 46
@@ -138,14 +166,15 @@ def render(data, min_panels=0):
     away_note = f", {len(hidden)} away 7+ days hidden" if hidden else ""
     PER = 10; rh = 52
     chunks = [rows[i:i + PER] for i in range(0, len(rows), PER)]
-    X = {'name': 40, 'lvl': 452, 'cls': 476, 'ilvl': 664, 'prof': 690, 'seen': W - 36}
+    X = {'name': 40, 'lvl': 452, 'cls': 476, 'ilvl': 664, 'prof': 690, 'week': 1000, 'seen': W - 36}
+    gains = week_gains(rows, now)
     for ci, chunk in enumerate(chunks):
         Hh = 107 + 44 + len(chunk) * rh + 22
         im = Image.new('RGB', (W, Hh), BG); d = ImageDraw.Draw(im)
         a = ci * PER + 1
-        header(d, f"{data['guild']}: roster", f"Members {a} to {a + len(chunk) - 1} of {len(rows)}, highest level first{away_note}")
+        header(d, f"{data['guild']} Roster", f"Members {a} to {a + len(chunk) - 1} of {len(rows)}, highest level first{away_note}")
         y = 107 + 10; hf = F(15, True)
-        for label, x, right in (('NAME', X['name'], 0), ('LVL', X['lvl'], 1), ('CLASS', X['cls'], 0), ('ILVL', X['ilvl'], 1), ('PROFESSIONS', X['prof'], 0), ('LAST SEEN', X['seen'], 1)):
+        for label, x, right in (('NAME', X['name'], 0), ('LVL', X['lvl'], 1), ('CLASS', X['cls'], 0), ('ILVL', X['ilvl'], 1), ('DUNGEONS IN RANGE', X['prof'], 0), ('THIS WEEK', X['week'], 1), ('LAST SEEN', X['seen'], 1)):
             d.text((x - (d.textlength(label, font=hf) if right else 0), y + 8), label, font=hf, fill=MUTE)
         y += 34
         for i, r in enumerate(chunk):
@@ -159,12 +188,12 @@ def render(data, min_panels=0):
             s = str(r['level']); d.text((X['lvl'] - d.textlength(s, font=F(22, True)), y + 11), s, font=F(22, True), fill=TXT)
             d.text((X['cls'], y + 13), fit(d, (r['race'] + ' ' + r['cls']).strip(), F(19), 160), font=F(19), fill=MUTE)
             s = str(r['ilvl'] or '-'); d.text((X['ilvl'] - d.textlength(s, font=F(20)), y + 12), s, font=F(20), fill=TXT)
-            main = sorted([(v, p) for p, v in r['skills'].items() if p in CRAFT + GATHER], reverse=True)[:2]
-            px = X['prof']
-            for v, p in main:
-                d.text((px, y + 13), p, font=F(19), fill=TXT); px += d.textlength(p + ' ', font=F(19))
-                d.text((px, y + 13), str(v), font=F(19, True), fill=GOLD); px += d.textlength(str(v), font=F(19, True)) + 18
-            if not main: d.text((px, y + 13), 'none yet', font=F(19), fill=MUTE)
+            dz = dungeons_for(r['level'])
+            dtxt = ', '.join(dz) if dz else ('too low yet' if r['level'] < 13 else 'none')
+            d.text((X['prof'], y + 13), fit(d, dtxt, F(19), X['week'] - X['prof'] - 90), font=F(19), fill=TXT if dz else MUTE)
+            g = gains.get(r['name'])
+            gt = '-' if g is None else (f'+{g}' if g > 0 else '0')
+            d.text((X['week'] - d.textlength(gt, font=F(20, True)), y + 12), gt, font=F(20, True), fill=GOLD if (g or 0) > 0 else MUTE)
             s = seen(r['seen']); d.text((X['seen'] - 12 - d.textlength(s, font=F(18)), y + 14), s, font=F(18), fill=MUTE)
             y += rh
         panels.append((f'guild_roster_{ci + 1}.png', im))
@@ -172,7 +201,7 @@ def render(data, min_panels=0):
     n = len(panels)
     while len(panels) < min_panels:
         im = Image.new('RGB', (W, 150), BG); d = ImageDraw.Draw(im)
-        header(d, f"{data['guild']}: roster", f"That's everyone active this week{away_note}.")
+        header(d, f"{data['guild']} Roster", f"That's everyone active this week{away_note}.")
         panels.append((f'guild_roster_spare_{len(panels) - n + 1}.png', im))
     paths = []
     for name, im in panels:

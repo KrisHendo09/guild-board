@@ -23,6 +23,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Restore level history (for the This Week column)
+        uses: actions/cache@v4
+        with:
+          path: tools/out/level_history.json
+          key: level-history-${{ github.run_id }}
+          restore-keys: level-history-
       - name: Install Pillow and fonts
         run: |
           pip install --quiet pillow
