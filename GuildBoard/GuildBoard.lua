@@ -6,7 +6,9 @@
 --   /gb run         after a dungeon or raid: damage, healing and damage taken for the group
 --   /gb run last    the same, for the last fight only
 --   /gb sync        ask everyone online to resend
--- Also shares spec and average item level. Shares nothing about gold, bags or individual gear.
+--   /gb bug what happened   bug report to copy into Discord or GitHub
+--   /gb disable feature     officers only: switch a broken feature off for the guild (/gb enable to undo)
+-- Also shares spec and average item level. Shares nothing about gold or bags.
 
 local _, ns = ...
 local PREFIX, VER = "GBOARD1", 2
@@ -135,7 +137,8 @@ local function onMessage(prefix, msg, channel, sender)
   elseif kind == "R" then
     shareKnown()
   elseif ns.handlers and ns.handlers[kind] then
-    ns.handlers[kind](sender, f)
+    local FEATURE = { N = "needs", C = "crafts", G = "upgrades", W = "dungeons", Q = "quests", K = "deaths", H = "hearths", V = "version", X = "killswitch", B = "bugshare" }
+    if ns.safe then ns.safe(FEATURE[kind] or ("msg-" .. kind), ns.handlers[kind], sender, f) else pcall(ns.handlers[kind], sender, f) end
   end
 end
 
@@ -176,8 +179,6 @@ local function rosterText()
     for _, w in ipairs(byProf[pn]) do who[#who + 1] = w.name .. " " .. w.rank end
     L[#L + 1] = pn .. ": " .. table.concat(who, ", ")
   end
-  if ns.wantsText then local ok, t = pcall(ns.wantsText); if ok then L[#L + 1] = t end end
-  if ns.needsText then local ok, t = pcall(ns.needsText); if ok then L[#L + 1] = t end end
   return table.concat(L, "\n")
 end
 
@@ -262,7 +263,17 @@ local function show(text)
     scroll:SetScrollChild(edit)
     frame.edit = edit
   end
-  frame.edit:SetText(text or rosterText())
+  if not text then
+    local parts = {}
+    local ok, r = pcall(ns.rosterText or rosterText)
+    parts[#parts + 1] = ok and r or rosterText()
+    for _, k in ipairs({ "wantsText", "needsText", "socialText" }) do
+      if ns[k] then local ok2, t = pcall(ns[k]); if ok2 and t then parts[#parts + 1] = t end end
+    end
+    parts[#parts + 1] = "\n/gb bug what happened  = bug report     Minimap button: left-click dungeons, right-click this window"
+    text = table.concat(parts, "\n")
+  end
+  frame.edit:SetText(text)
   frame:Show(); frame.edit:SetFocus(); frame.edit:HighlightText()
 end
 
@@ -314,6 +325,14 @@ SlashCmdList["GUILDBOARD"] = function(arg)
   elseif cmd == "run" then
     local ok, err = pcall(function() show(runText(rest:lower() == "last")) end)
     if not ok then print("Guild Board error: " .. tostring(err)) end
+  elseif cmd == "bug" then
+    local ok, err = pcall(function() show(ns.bugText(rest)) end)
+    if not ok then print("Guild Board error: " .. tostring(err)) end
+  elseif cmd == "clearbugs" then
+    ns.clearErrors(); print("|cff33ff99Guild Board|r: error log cleared.")
+  elseif cmd == "disable" or cmd == "enable" then
+    if rest == "" then print("|cff33ff99Guild Board|r: features are needs, crafts, upgrades, mats, dungeons, quests, deaths, dings, hearths, partycheck")
+    else ns.setFeature(rest:lower(), cmd == "enable") end
   elseif cmd == "sync" then
     pcall(broadcastSelf); send("R")
     print("|cff33ff99Guild Board|r: asked everyone online to resend. Give it 15 seconds, then /gb")

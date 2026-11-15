@@ -5,6 +5,8 @@
 ## Version: 1.3.0
 ## SavedVariables: GuildBoardDB
 
+Core.lua
 GuildBoard.lua
 Needs.lua
 Extras.lua
+Social.lua

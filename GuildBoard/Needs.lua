@@ -191,17 +191,18 @@ local function addLines(tip, id)
   tip.gbDone = id
   local self = me()
   local needers, makers = {}, {}
-  for who, n in pairs(db().needs) do
+  if ns.featureOff("needs") then db().needs = db().needs end
+  for who, n in pairs(ns.featureOff("needs") and {} or db().needs) do
     local left = n.items and n.items[id]
     if left and left > 0 and who ~= self then needers[#needers + 1] = short(who) .. " " .. left end
   end
-  for who, c in pairs(db().crafts) do
+  for who, c in pairs(ns.featureOff("crafts") and {} or db().crafts) do
     if c.items and c.items[id] and who ~= self then makers[#makers + 1] = short(who) end
   end
   local mineLeft = myRemaining()[id]
   local extra = {}
-  for _, fn in ipairs(ns.tipExtras or {}) do
-    local ok, lines = pcall(fn, id)
+  for _, x in ipairs(ns.tipExtras or {}) do
+    local ok, lines = ns.safe(x[1], x[2], id)
     if ok and lines then for _, l in ipairs(lines) do extra[#extra + 1] = l end end
   end
   if #needers > 0 or #makers > 0 or mineLeft or #extra > 0 then tip:AddLine(" ") end
@@ -216,13 +217,13 @@ end
 local function hookTooltips()
   if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall and Enum and Enum.TooltipDataType then
     TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tip, data)
-      pcall(addLines, tip, data and data.id)
+      ns.safe("tooltip", addLines, tip, data and data.id)
     end)
   end
   for _, tip in ipairs({ GameTooltip, ItemRefTooltip }) do
     if tip and tip.HookScript then
       pcall(tip.HookScript, tip, "OnTooltipSetItem", function(t)
-        local _, link = t:GetItem(); pcall(addLines, t, idFromLink(link))
+        local _, link = t:GetItem(); ns.safe("tooltip", addLines, t, idFromLink(link))
       end)
     end
   end
@@ -325,7 +326,7 @@ for _, e in ipairs({ "PLAYER_LOGIN", "BAG_UPDATE_DELAYED", "TRADE_SKILL_SHOW", "
   pcall(ev.RegisterEvent, ev, e)
 end
 local bagTimer, scanTimer
-ev:SetScript("OnEvent", function(_, e)
+ev:SetScript("OnEvent", ns.guard("needs", function(_, e)
   if e == "PLAYER_LOGIN" then
     db(); pcall(hookTooltips); pcall(hookClicks)
   elseif e == "BAG_UPDATE_DELAYED" then
@@ -345,7 +346,7 @@ ev:SetScript("OnEvent", function(_, e)
       if after ~= before then pcall(broadcastCrafts) end
     end)
   end
-end)
+end))
 
 -- text block for the /gb window
 ns.needsText = function()

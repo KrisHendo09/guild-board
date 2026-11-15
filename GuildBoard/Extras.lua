@@ -203,8 +203,8 @@ local function matsLines(id)
 end
 
 ns.tipExtras = ns.tipExtras or {}
-table.insert(ns.tipExtras, matsLines)
-table.insert(ns.tipExtras, upgradeLines)
+table.insert(ns.tipExtras, { "mats", matsLines })
+table.insert(ns.tipExtras, { "upgrades", upgradeLines })
 
 -- ===== dungeon wants =====
 -- WoW Forever dungeon list and level ranges (warcrafttavern.com, Nov 2026). The last field is a word from the
@@ -273,6 +273,7 @@ ns.handlers.W = function(sender, f)
 end
 
 local function toggleWant(k)
+  if ns.featureOff("dungeons") then print(GREEN .. "Guild Board|r: dungeon flags are switched off right now."); return end
   local w = myWants()
   if w[k] then w[k] = nil else w[k] = time() + WANT_HOURS * 3600 end
   broadcastWants()
@@ -428,7 +429,7 @@ end
 local ev = CreateFrame("Frame")
 for _, e in ipairs({ "PLAYER_LOGIN", "PLAYER_EQUIPMENT_CHANGED", "PLAYER_LEVEL_UP", "ENCOUNTER_END", "BOSS_KILL", "PLAYER_ENTERING_WORLD" }) do pcall(ev.RegisterEvent, ev, e) end
 local gearTimer
-ev:SetScript("OnEvent", function(_, e, a1, a2, a3, a4, a5)
+ev:SetScript("OnEvent", ns.guard("extras", function(_, e, a1, a2, a3, a4, a5)
   if e == "PLAYER_LOGIN" then
     pcall(makeMinimapButton)
     C_Timer.NewTicker(600, function() local before = wantsString(); myWants(); if wantsString() ~= before then pcall(broadcastWants) end end)
@@ -443,4 +444,4 @@ ev:SetScript("OnEvent", function(_, e, a1, a2, a3, a4, a5)
   elseif e == "BOSS_KILL" or (e == "ENCOUNTER_END" and a5 == 1) then
     if inside then kills = kills + 1 end
   end
-end)
+end))
