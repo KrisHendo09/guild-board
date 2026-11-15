@@ -71,7 +71,9 @@ if __name__ == "__main__":
     payload = build(members, os.environ.get("GUILD_NAME") or "Guild")
     if "--dry" in sys.argv:
         print(json.dumps(payload, indent=2)); sys.exit(0)
-    url = os.environ["DISCORD_WEBHOOK_URL"].strip()
+    url = (os.environ.get("DISCORD_WEBHOOK_URL") or "").strip()
+    if not url.startswith("https://"):
+        print("DISCORD_WEBHOOK_URL is empty or not a URL. Add it under Settings > Secrets and variables > Actions > Repository secrets."); sys.exit(1)
     msg_id = (os.environ.get("MESSAGE_ID") or "").strip()
     try:
         new_id = send(url, payload, msg_id)
