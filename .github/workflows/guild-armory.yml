@@ -1,0 +1,32 @@
+# Posts the Push To Prod guild board (crafting board + roster panels) to #guild-board every hour,
+# built from the WoW Forever Armory API, so no addon or computer is needed.
+# Secrets: BLIZZARD_CLIENT_ID, BLIZZARD_CLIENT_SECRET, GUILD_BOARD (webhook URL).
+# It only edits the existing posts (EDIT_ONLY) so it can never spam the channel.
+name: Guild Board to Discord
+on:
+  schedule:
+    - cron: '7 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Pillow and fonts
+        run: |
+          pip install --quiet pillow
+          fc-list | grep -qi dejavu || (sudo apt-get update -qq && sudo apt-get install -y -qq fonts-dejavu-core)
+      - name: Build and post the board
+        env:
+          BLIZZARD_CLIENT_ID: ${{ secrets.BLIZZARD_CLIENT_ID }}
+          BLIZZARD_CLIENT_SECRET: ${{ secrets.BLIZZARD_CLIENT_SECRET }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.GUILD_BOARD }}
+          DISCORD_MESSAGE_IDS: ${{ vars.DISCORD_MESSAGE_IDS || '1571388348696764568,1571400510173614100,1571400516792094772' }}
+          EDIT_ONLY: '1'
+        run: python tools/guild_armory.py
