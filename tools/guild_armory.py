@@ -72,7 +72,7 @@ def fetch():
 
 
 # ---------------------------------------------------------------- drawing
-def render(data):
+def render(data, min_panels=0):
     from PIL import Image, ImageDraw, ImageFont
     FD = '/usr/share/fonts/truetype/dejavu/'
     def F(size, bold=False): return ImageFont.truetype(FD + ('DejaVuSans-Bold.ttf' if bold else 'DejaVuSans.ttf'), size)
@@ -131,7 +131,11 @@ def render(data):
         y += ((len(profs) + cols - 1) // cols) * (ch + gap)
     panels.append(('guild_crafting.png', im))
 
-    # ---- roster panels
+    # ---- roster panels (anyone offline 7+ days is hidden until they log back in)
+    AWAY = 7 * 86400
+    hidden = [r for r in rows if r['seen'] and now - r['seen'] / 1000 >= AWAY]
+    rows = [r for r in rows if r not in hidden]
+    away_note = f", {len(hidden)} away 7+ days hidden" if hidden else ""
     PER = 10; rh = 52
     chunks = [rows[i:i + PER] for i in range(0, len(rows), PER)]
     X = {'name': 40, 'lvl': 452, 'cls': 476, 'ilvl': 664, 'prof': 690, 'seen': W - 36}
@@ -139,7 +143,7 @@ def render(data):
         Hh = 107 + 44 + len(chunk) * rh + 22
         im = Image.new('RGB', (W, Hh), BG); d = ImageDraw.Draw(im)
         a = ci * PER + 1
-        header(d, f"{data['guild']}: roster", f"Members {a} to {a + len(chunk) - 1} of {len(rows)}, highest level first")
+        header(d, f"{data['guild']}: roster", f"Members {a} to {a + len(chunk) - 1} of {len(rows)}, highest level first{away_note}")
         y = 107 + 10; hf = F(15, True)
         for label, x, right in (('NAME', X['name'], 0), ('LVL', X['lvl'], 1), ('CLASS', X['cls'], 0), ('ILVL', X['ilvl'], 1), ('PROFESSIONS', X['prof'], 0), ('LAST SEEN', X['seen'], 1)):
             d.text((x - (d.textlength(label, font=hf) if right else 0), y + 8), label, font=hf, fill=MUTE)
@@ -164,6 +168,12 @@ def render(data):
             s = seen(r['seen']); d.text((X['seen'] - 12 - d.textlength(s, font=F(18)), y + 14), s, font=F(18), fill=MUTE)
             y += rh
         panels.append((f'guild_roster_{ci + 1}.png', im))
+    # keep the same number of Discord posts when the roster shrinks: fill spare posts with a short note
+    n = len(panels)
+    while len(panels) < min_panels:
+        im = Image.new('RGB', (W, 150), BG); d = ImageDraw.Draw(im)
+        header(d, f"{data['guild']}: roster", f"That's everyone active this week{away_note}.")
+        panels.append((f'guild_roster_spare_{len(panels) - n + 1}.png', im))
     paths = []
     for name, im in panels:
         p = os.path.join(OUT, name); im.save(p, optimize=True); paths.append(p)
@@ -220,6 +230,8 @@ if __name__ == '__main__':
         raise SystemExit(f'BLIZZARD_ERROR {e.code}')
     except urllib.error.URLError as e:
         raise SystemExit(f'NETWORK_ERROR {type(e.reason).__name__}')
-    paths = render(data)
+    ids_env = os.environ.get('DISCORD_MESSAGE_IDS', '')
+    want = 0 if ids_env == 'none' else len([x for x in ids_env.split(',') if x.strip()])
+    paths = render(data, want)
     if '--dry' in sys.argv: print('DRY', [os.path.basename(p) for p in paths])
     else: send(paths)
