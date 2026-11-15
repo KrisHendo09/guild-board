@@ -4,8 +4,8 @@
 --   Party:    what to fix first (quests to share, who needs to repair or empty bags), then the quests the group
 --             has in common, current zone first, plus Kris's shared Claude list when he's in the group.
 -- Everything is worked out on your own PC. Items clear themselves when they're done; nothing to tick off.
--- The gear button picks what each tab tracks (saved per character). Hides in combat. Opens from the minimap
--- right-click menu or /gb track.
+-- The gear button picks what each tab tracks (saved per character). Hides in combat. Only opens when you ask:
+-- minimap right-click menu or /gb track. X or Esc closes it.
 local _, ns = ...
 local YELLOW, GREEN, RED, GRAY, GOLD = "|cffffd100", "|cff33ff99", "|cffff5533", "|cff9d9d9d", "|cffe8b964"
 local CT_PREFIX = "CTASKS1"
@@ -59,6 +59,11 @@ local function questLog()        -- { id, title, zone, complete }
         if q.isHeader then zone = q.title or ""
         elseif q.questID then
           local done = (C_QuestLog.IsComplete and C_QuestLog.IsComplete(q.questID)) or false
+          -- "go talk to X" quests have no objectives and count as complete the moment you take them; skip those
+          if done and C_QuestLog.GetQuestObjectives then
+            local objs = C_QuestLog.GetQuestObjectives(q.questID)
+            if not objs or #objs == 0 then done = false end
+          end
           out[#out + 1] = { id = q.questID, title = q.title or ("Quest " .. q.questID), zone = zone, complete = done }
         end
       end
@@ -67,7 +72,11 @@ local function questLog()        -- { id, title, zone, complete }
     for i = 1, GetNumQuestLogEntries() do
       local title, _, _, isHeader, _, isComplete, _, id = GetQuestLogTitle(i)
       if isHeader then zone = title or ""
-      elseif title and id then out[#out + 1] = { id = id, title = title, zone = zone, complete = isComplete == 1 or isComplete == true } end
+      elseif title and id then
+        local done = isComplete == 1 or isComplete == true
+        if done and GetNumQuestLeaderBoards and GetNumQuestLeaderBoards(i) == 0 then done = false end
+        out[#out + 1] = { id = id, title = title, zone = zone, complete = done }
+      end
     end
   end
   return out
@@ -124,11 +133,12 @@ local function personal(add)
   if #up > 0 then add(GOLD .. "UPKEEP|r", true); for _, t in ipairs(up) do add(t) end end
 
   if opt("turnins") then
-    local ready = {}
+    local ready, here = {}, GetRealZoneText and GetRealZoneText() or ""
     for _, q in ipairs(questLog()) do if q.complete then ready[#ready + 1] = q end end
+    table.sort(ready, function(a, b) if (a.zone == here) ~= (b.zone == here) then return a.zone == here end return a.title < b.title end)
     if #ready > 0 then
-      add(GOLD .. "TURN IN|r", true)
-      for _, q in ipairs(ready) do add(q.title .. GRAY .. "  " .. q.zone .. "|r") end
+      add(GOLD .. "TURN IN|r" .. GRAY .. (#ready > 5 and ("  " .. #ready - 5 .. " more") or "") .. "|r", true)
+      for i = 1, math.min(#ready, 5) do add(ready[i].title .. GRAY .. "  " .. ready[i].zone .. "|r") end
     end
   end
 
@@ -292,7 +302,9 @@ local function build()
   gear:SetScript("OnEnter", function(b) GameTooltip:SetOwner(b, "ANCHOR_TOP"); GameTooltip:SetText("What to track"); GameTooltip:Show() end)
   gear:SetScript("OnLeave", function() GameTooltip:Hide() end)
   local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton"); close:SetSize(24, 24); close:SetPoint("TOPRIGHT", 2, 2)
-  close:SetScript("OnClick", function() db().shown = false; frame:Hide() end)
+  close:SetScript("OnClick", function() db().shown = false; frame:Hide(); if settings then settings:Hide() end end)
+  frame:SetScript("OnHide", function() if settings then settings:Hide() end end)
+  tinsert(UISpecialFrames, "GuildBoardTracker")      -- Esc closes it
   for i = 1, MAXROWS do
     local y = -30 - (i - 1) * ROWH
     local r = { y = y }
@@ -373,14 +385,14 @@ for _, e in ipairs({ "PLAYER_LOGIN", "PLAYER_REGEN_DISABLED", "PLAYER_REGEN_ENAB
 ev:SetScript("OnEvent", function(_, e, ...)
   if e == "PLAYER_LOGIN" then
     if C_ChatInfo and C_ChatInfo.RegisterAddonMessagePrefix then pcall(C_ChatInfo.RegisterAddonMessagePrefix, CT_PREFIX) end
-    C_Timer.After(3, function() if db().shown ~= false then pcall(ns.openTracker) end end)
+    -- the tracker never opens by itself; the minimap button or /gb track opens it
   elseif e == "CHAT_MSG_ADDON" then
     local prefix, msg, _, sender = ...
     if prefix == CT_PREFIX and msg then pcall(onCT, msg, sender or "") end
   elseif e == "PLAYER_REGEN_DISABLED" then
     if frame and opt("hideCombat") then frame:Hide() end
   elseif e == "PLAYER_REGEN_ENABLED" then
-    if frame and db().shown ~= false then frame:Show(); ns.trackerRefresh() end
+    if frame and db().shown == true then frame:Show(); ns.trackerRefresh() end
   elseif e == "TRAINER_SHOW" then
     local isProf = IsTradeskillTrainer and IsTradeskillTrainer()
     if not isProf then db().trainedAt = UnitLevel("player") end
