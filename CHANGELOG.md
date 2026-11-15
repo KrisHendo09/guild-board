@@ -3,13 +3,12 @@
 ## Guild Board
 
 ### 1.4.0 (2026-11-15)
-- Fixed: guildies with a two-part name (like Jay Spaceman) showed up twice in needs, and "Send needs" could address a mail to yourself. Old duplicate entries are merged on login. (reported by jspaceman)
-- Fixed: the "Send needs" button was hidden behind the mail window; it now sits just outside its top right corner. (reported by jspaceman)
+- Fixed: guildies with a two-part name showed up twice in needs, and "Send needs" could address a mail to yourself. Old duplicate entries are merged on login.
+- Fixed: the "Send needs" button was hidden behind the mail window; it now sits just outside its top right corner.
 - Fixed: officers with a two-part name could not use the kill switch.
 - Fixed: bug reports showed "(nil)" for the game build.
 - The minimap button now sits outside the minimap's edge instead of inside it. Drag it around the ring as before.
-- The separate Claude Paste addon is retired. Its feature lives in Guild Board now; you can delete the old ClaudePaste folder.
-- Claude Paste is built in: Shift+click the minimap button (or /gb paste, /cp) to copy your character summary.
+- New Character Card: Shift+click the minimap button (or /gb card, /cp) to copy your character summary. It replaces the separate Claude Paste addon; you can delete the old ClaudePaste folder.
 - Out of date? The addon now nags you on screen with a raid warning at login and every 45 minutes until you update.
 - `/gb versions` shows which guildies are on which version (green = newest, orange = needs to update).
 

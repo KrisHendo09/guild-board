@@ -1,4 +1,4 @@
--- Claude Paste built into Guild Board: Shift+click the minimap button, /gb paste or /cp opens a text summary
+-- Character Card (was the separate Claude Paste addon): Shift+click the minimap button, /gb card or /cp opens a text summary
 -- of your character (gear, bags, quests, talents, professions) to paste to Kris or Claude.
 local _, ns = ...
 -- Press Ctrl+C (it is already selected), then paste it in Discord.
@@ -207,7 +207,7 @@ local function show()
     frame:EnableMouse(true); frame:SetMovable(true); frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", frame.StartMoving); frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
     local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    title:SetPoint("TOP", 0, -10); title:SetText("Claude Paste: press Ctrl+C, then paste in Discord. Esc closes.")
+    title:SetPoint("TOP", 0, -10); title:SetText("Character Card: press Ctrl+C, then paste in Discord. Esc closes.")
     local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton"); close:SetPoint("TOPRIGHT", 2, 2)
     local scroll = CreateFrame("ScrollFrame", "GuildBoardPasteScroll", frame, "UIPanelScrollFrameTemplate")
     scroll:SetPoint("TOPLEFT", 12, -32); scroll:SetPoint("BOTTOMRIGHT", -32, 12)
@@ -222,11 +222,11 @@ local function show()
   frame.edit:SetText(text)
   frame:Show()
   frame.edit:SetFocus(); frame.edit:HighlightText()
-  print("|cff33ff99Claude Paste|r: " .. #text .. " characters ready. Ctrl+C to copy.")
+  print("|cff33ff99Character Card|r: " .. #text .. " characters ready. Ctrl+C to copy.")
 end
 
-ns.paste = function() local ok, err = pcall(show); if not ok then print("Claude Paste error: " .. tostring(err)) end end
--- keep /cp working; if the standalone Claude Paste addon is also installed, it keeps /cp and this one stays out of the way
+ns.paste = function() local ok, err = pcall(show); if not ok then print("Character Card error: " .. tostring(err)) end end
+-- keep /cp working for anyone used to it; if the old standalone Claude Paste addon is still installed, it keeps /cp and this one stays out of the way
 if not SlashCmdList["CLAUDEPASTE"] then
   SLASH_CLAUDEPASTE1 = "/cp"
   SLASH_CLAUDEPASTE2 = "/claudepaste"

@@ -1,13 +1,56 @@
-{"out": "patch_notes_1_4_0.png", "title": "Guild Board 1.4.0", "sub": "PATCH NOTES  ·  BUG FIXES AND QUALITY OF LIFE",
+{
+ "out": "patch_notes_1_4_0.png",
+ "title": "Guild Board 1.4.0",
+ "sub": "PATCH NOTES  \u00b7  BUG FIXES AND QUALITY OF LIFE",
  "rows": [
-  {"label": "FIXED", "color": [90, 200, 110], "items": [
-    ["One name per guildie", "Two-part names like Jay Spaceman no longer show up twice in needs. Old duplicates merge on login."],
-    ["Send needs", "No more mailing yourself, and the button now sits outside the mail window where you can click it."],
-    ["Officer kill switch", "Works for officers with two-part names. The emergency brake actually brakes now."],
-    ["Fish Focus 1.0.1", "A reload or disconnect while fishing can't leave your music and voices muted anymore."]]},
-  {"label": "NEW", "color": [232, 185, 100], "items": [
-    ["Minimap button", "Sits outside the minimap instead of inside it. Drag it anywhere around the ring."],
-    ["Claude Paste built in", "Shift+click the minimap button to copy your character. Delete the old ClaudePaste folder."],
-    ["Update nag", "Behind on versions? You get an on-screen warning at login and every 45 minutes until you update."],
-    ["/gb versions", "See who in the guild is on which version. The Wall of Heroes in #guild-board shows it too."]]}],
- "footer": "Update from the pin in #addons  ·  CurseForge auto updates once approved  ·  /gb bug to report issues"}
+  {
+   "label": "FIXED",
+   "color": [
+    90,
+    200,
+    110
+   ],
+   "items": [
+    [
+     "One name per guildie",
+     "Two-part names no longer show up twice in needs. Old duplicates merge on login."
+    ],
+    [
+     "Send needs",
+     "No more mailing yourself, and the button now sits outside the mail window where you can click it."
+    ],
+    [
+     "Officer kill switch",
+     "Works for officers with two-part names. The emergency brake actually brakes now."
+    ],
+    [
+     "Fish Focus 1.0.1",
+     "A reload or disconnect while fishing can't leave your music and voices muted anymore."
+    ]
+   ]
+  },
+  {
+   "label": "NEW",
+   "color": [
+    232,
+    185,
+    100
+   ],
+   "items": [
+    [
+     "Minimap button",
+     "Now sits outside the minimap. Shift+click it for your Character Card, a copy-paste summary of your character."
+    ],
+    [
+     "Update nag",
+     "Behind on versions? You get an on-screen warning at login and every 45 minutes until you update."
+    ],
+    [
+     "/gb versions",
+     "See who in the guild is on which version. The Wall of Heroes in #guild-board shows it too."
+    ]
+   ]
+  }
+ ],
+ "footer": "Update from the pin in #addons  \u00b7  CurseForge auto updates once approved  \u00b7  /gb bug to report issues"
+}

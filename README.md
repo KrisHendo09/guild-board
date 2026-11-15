@@ -40,7 +40,7 @@ Useful ones to make:
 |---|---|---|
 | Board | `/gb` | Opens the guild roster |
 | Run | `/gb run` | Opens the report for the dungeon or raid you just did |
-| Paste | Shift+click the minimap button, `/gb paste` or `/cp` | Your character summary to copy and paste (Claude Paste is now built into Guild Board) |
+| Character Card | Shift+click the minimap button, `/gb card` or `/cp` | Your character summary to copy and paste (replaces the old Claude Paste addon) |
 
 ## Post it in Discord
 
