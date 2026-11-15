@@ -127,13 +127,14 @@ end
 local function onMessage(prefix, msg, channel, sender)
   if prefix ~= PREFIX or channel ~= "GUILD" then return end
   -- the guild channel echoes our own messages back; file them under the same key everything else uses for "me"
-  if ns.me and sender and sender:gsub("%-.*$", "") == UnitName("player") then sender = ns.me() end
+  sender = ns.canon(sender)     -- one name per person (see ns.canon in Core.lua); also catches our own echo
   local kind, rest = msg:match("^(%u)%^?(.*)$")
   local f = { strsplit(SEP, rest or "") }
   if kind == "D" then
     heardThisSession[sender] = true
     store(sender, f[2], f[3], f[4], f[5], f[6], f[7], "self", f[8], f[9], f[10])
   elseif kind == "E" then
+    f[1] = ns.canon(f[1])
     heardThisSession[f[1]] = true          -- someone already relayed it, no need for us to
     store(f[1], f[2], f[3], f[4], f[5], f[6], f[7], "relay", f[8], f[9], f[10])
   elseif kind == "R" then

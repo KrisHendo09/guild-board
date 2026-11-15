@@ -18,13 +18,8 @@ local function db()
   return GuildBoardDB
 end
 
-local function me()
-  local name, realm = UnitFullName and UnitFullName("player")
-  if not name then name = UnitName("player") end
-  realm = realm or (GetNormalizedRealmName and GetNormalizedRealmName()) or ""
-  return realm ~= "" and (name .. "-" .. realm) or name
-end
-local function short(key) return (key or "?"):gsub("%-.*$", "") end
+local function me() return ns.canon(UnitName("player")) end
+local function short(key) return ns.display(key) end
 local function itemCount(id)
   local n = (C_Item and C_Item.GetItemCount and C_Item.GetItemCount(id, true)) or (GetItemCount and GetItemCount(id, true)) or 0
   return n or 0
@@ -316,10 +311,10 @@ local function fillMail()
     end
   end
   for who, n in pairs(db().needs) do
-    if who ~= self then
+    if ns.canon(who) ~= self then
       for id, left in pairs(n.items or {}) do
         if left > 0 and have[id] then
-          local to = Ambiguate and Ambiguate(who, "mail") or short(who)
+          local to = ns.canon(who)
           SendMailNameEditBox:SetText(to)
           if SendMailSubjectEditBox then SendMailSubjectEditBox:SetText(itemName(id)) end
           local slot, sent = 1, 0
@@ -347,9 +342,11 @@ end
 local mailButton
 local function makeMailButton()
   if mailButton or not SendMailFrame then return end
+  -- sits just outside the mail window's top right corner, where the stock mail UI can't cover it
   mailButton = CreateFrame("Button", "GuildBoardMailButton", SendMailFrame, "UIPanelButtonTemplate")
-  mailButton:SetSize(110, 22)
-  mailButton:SetPoint("BOTTOMLEFT", SendMailFrame, "TOPLEFT", 70, -62)
+  mailButton:SetSize(110, 24)
+  mailButton:SetFrameStrata("HIGH")
+  mailButton:SetPoint("TOPLEFT", MailFrame or SendMailFrame, "TOPRIGHT", 6, -28)
   mailButton:SetText("Send needs")
   mailButton:SetScript("OnClick", function() local ok, err = pcall(fillMail); if not ok then print("Guild Board: " .. tostring(err)) end end)
   mailButton:SetScript("OnEnter", function(b)

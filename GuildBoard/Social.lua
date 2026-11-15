@@ -13,7 +13,7 @@ local GREEN, GRAY, GOLD, RED = "|cff33ff99", "|cff9d9d9d", "|cffffd100", "|cffff
 local AWAY_DAYS = 7
 
 local function db() return ns.db() end
-local function short(k) return (k or "?"):gsub("%-.*$", "") end
+local function short(k) return ns.display(k) end
 local function me() return ns.me() end
 
 -- ===== guild roster (works for everyone, addon or not) =====
@@ -26,7 +26,7 @@ local function readRoster()
       local y, mo, d, h = 0, 0, 0, 0
       if not online and GetGuildRosterLastOnline then y, mo, d, h = GetGuildRosterLastOnline(i) end
       local days = (y or 0) * 365 + (mo or 0) * 30 + (d or 0) + (h or 0) / 24
-      out[short(name)] = { name = name, level = level or 0, class = class or "?", zone = zone or "", online = online and true or false,
+      out[(name:gsub("%-.*$", ""))] = { name = name, level = level or 0, class = class or "?", zone = zone or "", online = online and true or false,
         daysAway = online and 0 or days, note = note or "", onote = onote or "", rankIndex = rankIndex or 9 }
     end
   end
@@ -377,7 +377,7 @@ local function partyCheck(announce)
   for _, u in ipairs(units) do
     local nm = UnitName(u)
     local g
-    for key, v in pairs(db().gear or {}) do if short(key) == nm then g = v end end
+    for key, v in pairs(db().gear or {}) do if ns.canon(key) == ns.canon(nm) then g = v end end
     if u == "player" then g = { slots = {} }; for _, s in ipairs(CORE) do local l = GetInventoryItemLink("player", s); g.slots[s] = l and 1 or 0 end end
     if g and g.slots then
       local empty, tot, c = {}, 0, 0
@@ -437,6 +437,7 @@ ev:SetScript("OnEvent", function(_, e)
       if GuildRoster then pcall(GuildRoster) elseif C_GuildInfo and C_GuildInfo.GuildRoster then pcall(C_GuildInfo.GuildRoster) end
     end)
   elseif e == "GUILD_ROSTER_UPDATE" then
+    pcall(ns.learnNames)
     ns.safe("roster", function() roster = readRoster() end)
     ns.safe("dings", checkDings)
   elseif e == "QUEST_LOG_UPDATE" then

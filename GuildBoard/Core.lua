@@ -15,7 +15,7 @@
 local _, ns = ...
 local unpack = unpack or table.unpack
 ns.handlers = ns.handlers or {}
-ns.SCHEMA = 3
+ns.SCHEMA = 4
 local GREEN, GRAY = "|cff33ff99", "|cff9d9d9d"
 local MAX_ERRORS_PER_FEATURE = 5
 local errorCount, disabledThisSession = {}, {}
@@ -75,6 +75,29 @@ function ns.guard(feature, fn)
   return function(...) return select(2, ns.safe(feature, fn, ...)) end
 end
 
+-- ===== names =====
+-- WoW Forever shows names like "Jay Spaceman", but addon messages arrive from "Jay-Realm". Everything is filed
+-- under the first word (what the game uses for mail and whispers); ns.display turns it back into the full name.
+ns.canon = function(x)
+  if not x then return x end
+  x = tostring(x):gsub("%-.*$", "")
+  return x:match("^(%S+)") or x
+end
+ns.fullNames = {}
+ns.display = function(x)
+  local k = ns.canon(x)
+  return (k and ns.fullNames[k]) or k or "?"
+end
+local function learnNames()
+  local me = UnitName and UnitName("player")
+  if me then ns.fullNames[ns.canon(me)] = me end
+  for i = 1, (GetNumGuildMembers and GetNumGuildMembers() or 0) do
+    local n = GetGuildRosterInfo(i)
+    if n then n = n:gsub("%-.*$", ""); ns.fullNames[ns.canon(n)] = n end
+  end
+end
+ns.learnNames = learnNames
+
 -- ===== saved data repair and migration =====
 local SHAPES = { members = "table", needs = "table", crafts = "table", myNeeds = "table", myCrafts = "table", gear = "table",
   wants = "table", myWants = "table", quests = "table", deaths = "table", hearths = "table", myFlights = "table",
@@ -93,14 +116,18 @@ local function repair()
       for who, v in pairs(db[k]) do if type(v) ~= "table" then db[k][who] = nil; fixed = fixed + 1 end end
     end
   end
-  -- drop copies of our own data filed under a different name format (older versions did this)
-  local mine = UnitName and UnitName("player")
-  if mine and ns.me then
-    local key = ns.me()
-    for _, k in ipairs({ "needs", "crafts", "gear", "wants", "quests", "hearths" }) do
-      if db[k] then
-        for who in pairs(db[k]) do if who ~= key and who:gsub("%-.*$", "") == mine then db[k][who] = nil end end
+  -- file everyone under one name (1.3 and older saved "Jay Spaceman" and "Jay-Realm" as two people); newest copy wins
+  for _, k in ipairs({ "members", "needs", "crafts", "gear", "wants", "quests", "hearths", "versions" }) do
+    if db[k] then
+      local merged = {}
+      for who, v in pairs(db[k]) do
+        local key = ns.canon(who)
+        local old = merged[key]
+        local t = function(e) return tonumber(e.ts) or tonumber(e.at) or 0 end
+        if not old or t(v) > t(old) then merged[key] = v end
+        if key ~= who then fixed = fixed + 0 end
       end
+      db[k] = merged
     end
   end
   -- prune anything nobody has refreshed in 60 days
@@ -133,10 +160,10 @@ end
 -- ===== officer kill switch =====
 local function isOfficer(name)
   if not (IsInGuild and IsInGuild()) then return false end
-  local short = (name or ""):gsub("%-.*$", "")
+  local short = ns.canon(name or "")
   for i = 1, (GetNumGuildMembers and GetNumGuildMembers() or 0) do
     local n, _, rankIndex = GetGuildRosterInfo(i)
-    if n and n:gsub("%-.*$", "") == short then return (rankIndex or 99) <= 1 end
+    if n and ns.canon(n) == short then return (rankIndex or 99) <= 1 end
   end
   return false
 end
@@ -172,9 +199,9 @@ end
 -- ===== bug report =====
 function ns.bugText(note)
   local L = {}
-  local build, _, _, toc = GetBuildInfo and GetBuildInfo()
-  L[#L + 1] = "Guild Board bug report"
-  L[#L + 1] = "Version " .. version() .. "  |  game " .. tostring(build) .. " (" .. tostring(toc) .. ")  |  " .. date("%Y-%m-%d %H:%M")
+  local gameVersion, build
+  if GetBuildInfo then gameVersion, build = GetBuildInfo() end
+  L[#L + 1] = "Version " .. version() .. "  |  game " .. tostring(gameVersion or "?") .. " build " .. tostring(build or "?") .. "  |  " .. date("%Y-%m-%d %H:%M")
   L[#L + 1] = "Character level " .. (UnitLevel("player") or "?") .. " " .. (UnitClass("player") or "?") .. ", in " .. (GetRealZoneText() or "?")
   local off = {}
   for k in pairs(disabledThisSession) do off[#off + 1] = k .. " (paused)" end
@@ -210,6 +237,7 @@ function ns.clearErrors() GuildBoardDB.errors = {}; for k in pairs(disabledThisS
 local core = CreateFrame("Frame")
 core:RegisterEvent("PLAYER_LOGIN")
 core:SetScript("OnEvent", function()
+  pcall(learnNames)
   local ok, err = pcall(repair)
   if not ok then GuildBoardDB = { schema = ns.SCHEMA }; logError("data", "saved data was unreadable and was reset: " .. tostring(err)) end
   if GuildRoster then pcall(GuildRoster) elseif C_GuildInfo and C_GuildInfo.GuildRoster then pcall(C_GuildInfo.GuildRoster) end

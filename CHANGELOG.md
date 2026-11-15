@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- Fixed: guildies with a two-part name (like Jay Spaceman) showed up twice in needs, and "Send needs" could address a mail to yourself. Old duplicate entries are merged on login. (reported by jspaceman)
+- Fixed: the "Send needs" button was hidden behind the mail window; it now sits just outside its top right corner. (reported by jspaceman)
+- Fixed: officers with a two-part name could not use the kill switch.
+- Fixed: bug reports showed "(nil)" for the game build.
 - The separate Claude Paste addon is retired. Its feature lives in Guild Board now; you can delete the old ClaudePaste folder.
 - Claude Paste is built in: Shift+click the minimap button (or /gb paste, /cp) to copy your character summary.
 - Out of date? The addon now nags you on screen with a raid warning at login and every 45 minutes until you update.
