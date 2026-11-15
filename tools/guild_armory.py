@@ -242,7 +242,8 @@ def render(data, min_panels=0):
             latest = json.load(urllib.request.urlopen(req, timeout=10)).get('tag_name', '').lstrip('v') or None
         except Exception: pass
         known = [u['version'] for u in users.values() if u.get('version')]
-        if known and (not latest or vkey(max(known, key=vkey)) > vkey(latest)): latest = max(known, key=vkey)
+        if not latest and known: latest = max(known, key=vkey)      # only if GitHub can't be reached
+        # anyone on the published release or a newer test build counts as a hero
         heroes, old, none = [], [], []
         for r in rows:
             k = has_addon(r['name'], users)
