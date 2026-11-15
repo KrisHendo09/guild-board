@@ -4,7 +4,7 @@
 --   Mats: yellow "Could use" lines on crafting mats that match the skill bracket a guildie is leveling.
 --         Blue lines elsewhere are things someone actually asked for (Alt+click).
 --   Dungeons: click the minimap button to flag dungeons you want to run. Right-click it for the Guild Board window.
---         A flag turns off when you click it again, kill the last boss, out-level the dungeon, or after 48 hours.
+--         A flag turns off when you click it again, leave that dungeon after killing 3+ bosses, out-level it, or after 48 hours.
 
 local _, ns = ...
 local SEP = ns.SEP or "^"
@@ -146,19 +146,35 @@ local function upgradeLines(id)
 end
 
 -- ===== assumed mats by profession skill (yellow) =====
+-- Brackets follow the WoW Forever 1-300 leveling routes (rankedboost.com, Nov 2026). Vendor items (thread, salt,
+-- dye, vials, flux, spices) are left out because nobody needs those sent to them. Matched by item name.
 local M = {
-  LW = { { 1, 75, "2318,2934,783,2320" }, { 75, 150, "2319,4232,2321" }, { 150, 200, "4234,4235,4291" }, { 200, 250, "4304,8169" }, { 250, 300, "8170" } },
-  BS = { { 1, 75, "2840,2835" }, { 75, 125, "2841,3576,2836" }, { 125, 200, "3575,2838,3859" }, { 200, 250, "3860,7912" }, { 250, 300, "12359,12365" } },
-  TA = { { 1, 75, "2589,2996,2320" }, { 75, 125, "2592,2997,2321" }, { 125, 200, "4306,4305,4291" }, { 200, 250, "4338,4339" }, { 250, 300, "14047" } },
-  FA = { { 1, 80, "2589" }, { 80, 150, "2592" }, { 150, 210, "4306" }, { 210, 260, "4338" }, { 260, 300, "14047" } },
-  AL = { { 1, 60, "2447,765,3371" }, { 60, 110, "2450,785,2453" }, { 110, 165, "2453,3355,3356,3357,3369" }, { 165, 215, "3821,3358,3818" } },
-  EN = { { 1, 90, "10940,10938" }, { 90, 150, "10940,10939,10998" }, { 150, 200, "11083,11134,10978" }, { 200, 250, "11137" } },
-  EG = { { 1, 75, "2840,2835,2589" }, { 75, 150, "2841,2836,2592" }, { 150, 200, "3575,2838,3859" }, { 200, 250, "3860,7912,4338" } },
+  LW = { { 1, 90, "Light Leather" }, { 50, 65, "Light Hide" }, { 117, 130, "Light Hide" }, { 90, 145, "Medium Hide" },
+         { 101, 145, "Medium Leather" }, { 145, 195, "Heavy Leather" }, { 155, 195, "Heavy Hide" }, { 195, 225, "Thick Leather" },
+         { 225, 300, "Rugged Leather" }, { 262, 275, "Heavy Scorpid Scale" } },
+  BS = { { 1, 75, "Rough Stone,Copper Bar" }, { 75, 150, "Bronze Bar,Coarse Stone,Medium Leather,Silver Bar" },
+         { 150, 225, "Mageweave Cloth,Mithril Bar,Bronze Bar,Solid Stone,Heavy Stone,Steel Bar,Iron Bar,Coarse Stone,Medium Leather,Truesilver Bar,Silver Bar" },
+         { 225, 300, "Thorium Bar,Mithril Bar,Thick Leather,Rugged Leather,Solid Stone,Blue Sapphire,Purple Lotus,Dense Stone,Iron Bar" } },
+  TA = { { 1, 75, "Linen Cloth" }, { 75, 150, "Wool Cloth,Silk Cloth,Heavy Leather" }, { 150, 225, "Mageweave Cloth,Silk Cloth,Heavy Leather" },
+         { 225, 300, "Runecloth,Dream Dust,Rugged Leather,Star Ruby" } },
+  FA = { { 1, 75, "Linen Cloth,Peacebloom" }, { 75, 150, "Wool Cloth,Bruiseweed,Peacebloom" },
+         { 150, 225, "Silk Cloth,Mageweave Cloth,Thick Leather,Liferoot" }, { 225, 300, "Mageweave Cloth,Runecloth" } },
+  AL = { { 1, 75, "Silverleaf,Peacebloom,Mageroyal" }, { 75, 150, "Mageroyal,Peacebloom,Swiftthistle,Briarthorn,Bruiseweed,Stranglekelp" },
+         { 150, 225, "Mageroyal,Stranglekelp,Wild Steelbloom,Kingsblood,Goldthorn,Fadeleaf" },
+         { 225, 300, "Goldthorn,Fadeleaf,Arthas' Tears,Gromsblood,Dream Dust,Dreamfoil" } },
+  EN = { { 1, 25, "Mote of Magic" }, { 25, 70, "Lesser Magic Essence" }, { 99, 100, "Lesser Magic Essence" }, { 70, 140, "Strange Dust" },
+         { 130, 140, "Lesser Astral Essence" }, { 140, 200, "Soul Dust" }, { 200, 258, "Vision Dust" }, { 258, 284, "Greater Nether Essence" },
+         { 284, 300, "Dream Dust" } },
+  EG = { { 1, 75, "Linen Cloth,Copper Bar,Rough Stone" }, { 75, 150, "Wool Cloth,Linen Cloth,Copper Bar,Bronze Bar,Rough Stone,Heavy Stone,Medium Leather" },
+         { 150, 225, "Wool Cloth,Mithril Bar,Iron Bar,Solid Stone,Bronze Bar,Medium Leather,Gold Bar" },
+         { 225, 300, "Runecloth,Mageweave Cloth,Thorium Bar,Solid Stone,Mithril Bar,Dense Stone" } },
 }
 local PROF = { Leatherworking = "LW", Blacksmithing = "BS", Tailoring = "TA", ["First Aid"] = "FA", Alchemy = "AL", Enchanting = "EN", Engineering = "EG" }
 local SHORT = { LW = "LW", BS = "BS", TA = "Tailoring", FA = "First Aid", AL = "Alchemy", EN = "Enchanting", EG = "Engineering" }
 
 local function matsLines(id)
+  local iname = info(id)
+  if not iname then return nil end
   local who = {}
   local self = ns.me()
   local needs = db().needs or {}
@@ -170,8 +186,10 @@ local function matsLines(id)
         local code = pn and PROF[pn]
         rank = tonumber(rank)
         if code and rank then
+          local seen = false
           for _, b in ipairs(M[code]) do
-            if rank >= b[1] and rank < b[2] and ("," .. b[3] .. ","):find("," .. id .. ",", 1, true) then
+            if rank >= b[1] and rank < b[2] and ("," .. b[3] .. ","):find("," .. iname .. ",", 1, true) and not seen then
+              seen = true
               who[#who + 1] = short(key) .. " (" .. SHORT[code] .. " " .. rank .. ")"
             end
           end
@@ -189,25 +207,27 @@ table.insert(ns.tipExtras, matsLines)
 table.insert(ns.tipExtras, upgradeLines)
 
 -- ===== dungeon wants =====
+-- WoW Forever dungeon list and level ranges (warcrafttavern.com, Nov 2026). The last field is a word from the
+-- instance name; leaving that instance after killing at least one boss takes the flag off.
 local DUNGEONS = {
-  { "RFC", "Ragefire Chasm", 13, 18, "Taragaman the Hungerer" },
-  { "WC", "Wailing Caverns", 17, 24, "Mutanus the Devourer" },
-  { "DM", "The Deadmines", 17, 26, "Edwin VanCleef" },
-  { "SFK", "Shadowfang Keep", 22, 30, "Archmage Arugal" },
-  { "BFD", "Blackfathom Deeps", 24, 32, "Aku'mai" },
-  { "STOCKS", "The Stockade", 24, 32, "Bazil Thredd" },
-  { "GNOMER", "Gnomeregan", 29, 38, "Mekgineer Thermaplugg" },
-  { "RFK", "Razorfen Kraul", 29, 38, "Charlga Razorflank" },
-  { "SMGY", "SM Graveyard", 28, 38, "Bloodmage Thalnos" },
-  { "SMLIB", "SM Library", 29, 39, "Arcanist Doan" },
-  { "SMARM", "SM Armory", 32, 42, "Herod" },
-  { "SMCATH", "SM Cathedral", 35, 45, "High Inquisitor Whitemane" },
-  { "RFD", "Razorfen Downs", 37, 46, "Amnennar the Coldbringer" },
-  { "ULDA", "Uldaman", 41, 51, "Archaedas" },
-  { "ZF", "Zul'Farrak", 44, 54, "Chief Ukorz Sandscalp" },
-  { "MARA", "Maraudon", 46, 55, "Princess Theradras" },
-  { "ST", "Sunken Temple", 50, 56, "Shade of Eranikus" },
-  { "BRD", "Blackrock Depths", 52, 60, "Emperor Dagran Thaurissan" },
+  { "RFC", "Ragefire Chasm", 13, 18, "Ragefire" }, { "HOT", "Hall of Thanes", 13, 20, "Thanes" },
+  { "ROL", "Ruins of Lordaeron", 15, 22, "Lordaeron" }, { "WC", "Wailing Caverns", 15, 24, "Wailing" },
+  { "DM", "Deadmines", 17, 26, "Deadmines" }, { "SFK", "Shadowfang Keep", 20, 30, "Shadowfang" },
+  { "BFD", "Blackfathom Deeps", 24, 32, "Blackfathom" }, { "STOCKS", "The Stockade", 25, 29, "Stockade" },
+  { "EXC", "Excavation Site", 26, 33, "Excavation" }, { "DAL", "City of Dalaran", 28, 35, "Dalaran" },
+  { "RFK", "Razorfen Kraul", 29, 38, "Kraul" }, { "GNOMER", "Gnomeregan", 29, 38, "Gnomeregan" },
+  { "SMGY", "SM Graveyard", 30, 38, "Scarlet" }, { "SMLIB", "SM Library", 33, 41, "Scarlet" },
+  { "DROWN", "The Drowned City", 35, 42, "Drowned" }, { "SMARM", "SM Armory", 36, 44, "Scarlet" },
+  { "RFD", "Razorfen Downs", 37, 46, "Downs" }, { "SMCATH", "SM Cathedral", 38, 46, "Scarlet" },
+  { "KROL", "Krol'dok Stronghold", 40, 47, "Krol" }, { "ULDA", "Uldaman", 41, 51, "Uldaman" },
+  { "ZF", "Zul'Farrak", 44, 54, "Farrak" }, { "MARA", "Maraudon", 46, 55, "Maraudon" },
+  { "ALCAZ", "Alcaz Prison", 48, 55, "Alcaz" }, { "ST", "Sunken Temple", 50, 60, "Temple" },
+  { "BRD", "Blackrock Depths", 52, 60, "Depths" }, { "DME", "Dire Maul East", 54, 60, "Dire Maul" },
+  { "LBRS", "Lower Blackrock Spire", 55, 60, "Spire" }, { "BMH", "Blackmaw Hold", 55, 60, "Blackmaw" },
+  { "DMW", "Dire Maul West", 56, 60, "Dire Maul" }, { "DMN", "Dire Maul North", 56, 60, "Dire Maul" },
+  { "SHAPER", "Shaper's Terrace", 58, 60, "Shaper" }, { "STRATL", "Stratholme Main Gate", 58, 60, "Stratholme" },
+  { "STRATU", "Stratholme Service Gate", 58, 60, "Stratholme" }, { "SCHOLO", "Scholomance", 58, 60, "Scholomance" },
+  { "UBRS", "Upper Blackrock Spire", 59, 60, "Spire" },
 }
 local BYKEY = {}
 for _, d in ipairs(DUNGEONS) do BYKEY[d[1]] = d end
@@ -384,30 +404,43 @@ ns.broadcastMore = function()
   C_Timer.After(6, function() pcall(broadcastWants) end)
 end
 
+local inside, kills = nil, 0
+local function checkInstance()
+  local name, itype = GetInstanceInfo()
+  if itype == "party" or itype == "raid" then
+    if inside ~= name then inside, kills = name, 0 end
+    return
+  end
+  if inside and kills >= 3 then
+    local done = {}
+    for k in pairs(myWants()) do
+      local d = BYKEY[k]
+      if d and inside:find(d[5], 1, true) then myWants()[k] = nil; done[#done + 1] = d[2] end
+    end
+    if #done > 0 then
+      print(GREEN .. "Guild Board|r: " .. table.concat(done, ", ") .. " done. Took it off your list.")
+      pcall(broadcastWants)
+    end
+  end
+  inside, kills = nil, 0
+end
+
 local ev = CreateFrame("Frame")
-for _, e in ipairs({ "PLAYER_LOGIN", "PLAYER_EQUIPMENT_CHANGED", "PLAYER_LEVEL_UP", "ENCOUNTER_END", "BOSS_KILL" }) do pcall(ev.RegisterEvent, ev, e) end
+for _, e in ipairs({ "PLAYER_LOGIN", "PLAYER_EQUIPMENT_CHANGED", "PLAYER_LEVEL_UP", "ENCOUNTER_END", "BOSS_KILL", "PLAYER_ENTERING_WORLD" }) do pcall(ev.RegisterEvent, ev, e) end
 local gearTimer
 ev:SetScript("OnEvent", function(_, e, a1, a2, a3, a4, a5)
   if e == "PLAYER_LOGIN" then
     pcall(makeMinimapButton)
     C_Timer.NewTicker(600, function() local before = wantsString(); myWants(); if wantsString() ~= before then pcall(broadcastWants) end end)
+  elseif e == "PLAYER_ENTERING_WORLD" then
+    C_Timer.After(2, function() pcall(checkInstance) end)
   elseif e == "PLAYER_EQUIPMENT_CHANGED" then
     if gearTimer then return end
     gearTimer = true
     C_Timer.After(10, function() gearTimer = nil; pcall(broadcastGear, false) end)
   elseif e == "PLAYER_LEVEL_UP" then
     C_Timer.After(5, function() pcall(broadcastGear, true); pcall(broadcastWants) end)
-  else
-    local name = (e == "ENCOUNTER_END") and a2 or a2
-    local success = (e == "BOSS_KILL") or a5 == 1
-    if success and name then
-      for k in pairs(myWants()) do
-        if BYKEY[k][5] == name then
-          myWants()[k] = nil
-          print(GREEN .. "Guild Board|r: " .. BYKEY[k][2] .. " done. Took it off your list.")
-          pcall(broadcastWants)
-        end
-      end
-    end
+  elseif e == "BOSS_KILL" or (e == "ENCOUNTER_END" and a5 == 1) then
+    if inside then kills = kills + 1 end
   end
 end)
