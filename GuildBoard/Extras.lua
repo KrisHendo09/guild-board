@@ -231,6 +231,7 @@ local DUNGEONS = {
 }
 local BYKEY = {}
 for _, d in ipairs(DUNGEONS) do BYKEY[d[1]] = d end
+ns.dungeonByKey = BYKEY
 
 local function myWants()
   db().myWants = db().myWants or {}
@@ -368,14 +369,15 @@ local menu
 local function toggleMenu(anchor)
   if not menu then
     menu = CreateFrame("Frame", "GuildBoardMenu", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
-    menu:SetSize(150, 92); menu:SetFrameStrata("DIALOG")
+    menu:SetSize(150, 118); menu:SetFrameStrata("DIALOG")
     if menu.SetBackdrop then
       menu:SetBackdrop({ bgFile = "Interface\\ChatFrame\\ChatFrameBackground", edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 12,
         insets = { left = 3, right = 3, top = 3, bottom = 3 } })
       menu:SetBackdropColor(0, 0, 0, 0.92)
     end
     local items = {
-      { "Party Sync", function() if ns.partySync then ns.partySync() end end },
+      { "Tracker", function() if ns.toggleTracker then ns.toggleTracker() end end },
+      { "Party tab", function() if ns.partySync then ns.partySync() end end },
       { "Guild window", function() SlashCmdList["GUILDBOARD"]("") end },
       { "Character Card", function() if ns.paste then ns.paste() end end },
     }
@@ -422,7 +424,7 @@ local function makeMinimapButton()
   b:SetScript("OnEnter", function()
     GameTooltip:SetOwner(b, "ANCHOR_LEFT"); GameTooltip:SetText("Guild Board")
     GameTooltip:AddLine("Left-click: pick dungeons you want to run", 1, 1, 1)
-    GameTooltip:AddLine("Right-click: Party Sync, guild window, Character Card", 1, 1, 1)
+    GameTooltip:AddLine("Right-click: tracker, party tab, guild window, Character Card", 1, 1, 1)
     GameTooltip:AddLine("Shift+click: Character Card (copy your character to paste)", 1, 1, 1)
     GameTooltip:AddLine("Alt+click any item: I need this", 1, 1, 1)
     GameTooltip:Show()

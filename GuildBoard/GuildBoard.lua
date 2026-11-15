@@ -41,6 +41,7 @@ local function myProfs()
   end)
   return table.concat(out, ",")
 end
+ns.myProfs = function() return myProfs() end
 
 local function mySpec()
   if GuildBoardDB.mySpec and GuildBoardDB.mySpec ~= "" then return GuildBoardDB.mySpec end
@@ -341,6 +342,8 @@ SlashCmdList["GUILDBOARD"] = function(arg)
   elseif cmd == "bug" then
     local ok, err = pcall(function() show(ns.bugText(rest)) end)
     if not ok then print("Guild Board error: " .. tostring(err)) end
+  elseif cmd == "track" or cmd == "tracker" then
+    if ns.toggleTracker then ns.toggleTracker() end
   elseif cmd == "party" then
     if ns.partySync then ns.partySync() end
   elseif cmd == "card" or cmd == "paste" then
