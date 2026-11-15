@@ -1,34 +1,20 @@
-# Posts or updates the Guild Board roster card in Discord through a channel webhook.
-# Run it from the Actions tab or the API with the roster JSON from tools/roster_json.py.
-# The webhook URL lives in the repo secret GUILD_BOARD (or DISCORD_WEBHOOK_URL) and is never printed.
+# One-off cleanup: deletes the old test roster card. Removed after use.
 name: Discord roster
 on:
   workflow_dispatch:
     inputs:
-      roster:
-        description: Roster JSON (output of tools/roster_json.py)
-        required: true
       message_id:
-        description: Discord message id to edit (blank posts a new card)
-        required: false
-        default: ""
-      guild_name:
-        description: Title shown on the card
-        required: false
-        default: Push to Prod
+        required: true
 permissions:
   contents: read
 jobs:
-  post:
+  delete:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Install Pillow
-        run: pip install --quiet pillow
-      - name: Post roster card
+      - name: Delete test card
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.GUILD_BOARD }}
-          ROSTER_JSON: ${{ inputs.roster }}
-          MESSAGE_ID: ${{ inputs.message_id }}
-          GUILD_NAME: ${{ inputs.guild_name }}
-        run: python tools/discord_roster.py
+          HOOK: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.GUILD_BOARD }}
+          MID: ${{ inputs.message_id }}
+        run: |
+          echo "webhook id: $(echo "$HOOK" | cut -d/ -f6)"
+          curl -sS -o /dev/null -w "delete status %{http_code}\n" -X DELETE "$HOOK/messages/$MID"
