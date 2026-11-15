@@ -50,6 +50,8 @@ local function mySpec()
       name = (type(b) == "string" and b) or (type(a) == "table" and a.name) or nil
     end
   end)
+  -- some clients report the class name here; that is not a spec, so leave it blank
+  if name and name == UnitClass("player") then name = nil end
   return name or ""
 end
 
@@ -151,7 +153,7 @@ local function rosterText()
     end
     local age = math.floor((time() - (m.ts or 0)) / 3600)
     local seen = age < 1 and "now" or (age < 48 and (age .. "h ago") or (math.floor(age / 24) .. "d ago"))
-    local what = ((m.spec and m.spec ~= "") and (m.spec .. " ") or "") .. (m.class or "?")
+    local what = ((m.spec and m.spec ~= "" and m.spec ~= m.class) and (m.spec .. " ") or "") .. (m.class or "?")
     local extra = ((m.ilvl or 0) > 0 and ("  ilvl " .. m.ilvl) or "")
     L[#L + 1] = string.format("%-14s %2d %-22s %s%s", name, m.level, what, m.zone or "", extra)
     L[#L + 1] = "    " .. (#profs > 0 and table.concat(profs, ", ") or "no professions") .. "   (seen " .. seen .. ")"

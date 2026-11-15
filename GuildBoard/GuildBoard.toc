@@ -2,7 +2,7 @@
 ## Title: Guild Board
 ## Notes: Shares your level, zone and professions with guildmates who also run it. /gb to see everyone.
 ## Author: Kris + Claude
-## Version: 1.2
+## Version: 1.2.1
 ## SavedVariables: GuildBoardDB
 
 GuildBoard.lua
