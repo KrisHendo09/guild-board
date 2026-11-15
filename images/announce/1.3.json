@@ -1,0 +1,19 @@
+{
+ "embeds": [
+  {"title": "⚔️  Guild Board 1.3 has landed", "link": true,
+   "description": "**Lok'tar ogar, Push To Prod.** The addon finally pulls its weight. Hover any item and it tells you who in the guild wants it, ping the crew for dungeons from your minimap, and see every ding and death as it happens.\n\n**[⬇️  Download 1.3 now](https://github.com/KrisHendo09/guild-board/releases/latest)**  then restart WoW",
+   "image": "announce/guildboard_1_3.gif"},
+  {"title": "📜  Patch notes",
+   "fields": [
+    {"name": "🔵 Needs", "value": "Alt+click any item to ask for it", "inline": true},
+    {"name": "🟡 Mats", "value": "Auto picks up profession grinds", "inline": true},
+    {"name": "🟢 Upgrades", "value": "BoE beats a guildie's gear", "inline": true},
+    {"name": "🗺️ Dungeon Finder", "value": "Minimap button, pick what you want to run", "inline": true},
+    {"name": "⚔️ Dings and deaths", "value": "Level race and a death log", "inline": true},
+    {"name": "📬 Mailbox", "value": "Send needs in one click", "inline": true}],
+   "image": "announce/patch_notes_1_3.png"},
+  {"title": "📸  In game", "gallery": "https://github.com/KrisHendo09/guild-board#guild-board-what-it-does",
+   "images": ["dungeon-picker.png", "needs-tooltip.png", "needs-chat.png"]}
+ ],
+ "footer": "Something busted? Type /gb bug in game  ·  CurseForge auto updates coming soon  ·  For the Horde"
+}

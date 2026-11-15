@@ -1,0 +1,16 @@
+name: Announce
+# Kris starts this by hand. Posts one announcement to #addons through the ANNOUNCE_WEBHOOK secret.
+on:
+  workflow_dispatch:
+    inputs:
+      file: {description: 'Announcement file in images/announce', default: '1.3.json'}
+      ping: {description: 'Ping', type: choice, options: [none, everyone], default: none}
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/announce.py "images/announce/${{ inputs.file }}"
+        env:
+          ANNOUNCE_WEBHOOK: ${{ secrets.ANNOUNCE_WEBHOOK }}
+          PING: ${{ inputs.ping }}
