@@ -1,8 +1,9 @@
 ## Interface: 16001, 11509
 ## Title: Guild Board
-## Notes: Shares your level, zone and professions with guildmates who also run it. /gb to see everyone.
+## Notes: Shares level, zone and professions with guildmates. Alt+click an item to say you need it; tooltips show who needs it and who can make it.
 ## Author: Kris + Claude
-## Version: 1.2.1
+## Version: 1.3.0
 ## SavedVariables: GuildBoardDB
 
 GuildBoard.lua
+Needs.lua

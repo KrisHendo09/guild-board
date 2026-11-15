@@ -8,6 +8,7 @@
 --   /gb sync        ask everyone online to resend
 -- Also shares spec and average item level. Shares nothing about gold, bags or individual gear.
 
+local _, ns = ...
 local PREFIX, VER = "GBOARD1", 2
 local SEP = "^"
 GuildBoardDB = GuildBoardDB or {}
@@ -90,7 +91,11 @@ local function send(msg)
   queue[#queue + 1] = msg:sub(1, 250)
 end
 
-local function broadcastSelf() send("D" .. SEP .. VER .. SEP .. myFields()) end
+local function broadcastSelf()
+  send("D" .. SEP .. VER .. SEP .. myFields())
+  if ns.broadcastExtra then pcall(ns.broadcastExtra) end
+end
+ns.send, ns.SEP, ns.clean = send, SEP, clean
 
 local function store(key, class, level, zone, profs, note, ts, via, spec, ilvl, dps)
   ts = tonumber(ts) or 0; level = tonumber(level) or 0
@@ -129,6 +134,8 @@ local function onMessage(prefix, msg, channel, sender)
     store(f[1], f[2], f[3], f[4], f[5], f[6], f[7], "relay", f[8], f[9], f[10])
   elseif kind == "R" then
     shareKnown()
+  elseif ns.handlers and ns.handlers[kind] then
+    ns.handlers[kind](sender, f)
   end
 end
 
@@ -169,6 +176,7 @@ local function rosterText()
     for _, w in ipairs(byProf[pn]) do who[#who + 1] = w.name .. " " .. w.rank end
     L[#L + 1] = pn .. ": " .. table.concat(who, ", ")
   end
+  if ns.needsText then local ok, t = pcall(ns.needsText); if ok then L[#L + 1] = t end end
   return table.concat(L, "\n")
 end
 
