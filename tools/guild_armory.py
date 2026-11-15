@@ -253,7 +253,7 @@ def render(data, min_panels=0):
             else: heroes.append((r, v or '?'))
         im = canvas()
         im, d = header(im, 'Wall of Heroes', f"Guild Board addon  ·  latest is {latest or '?'}  ·  active in the last 7 days")
-        cols = [('HEROES', 'on the latest version', heroes, (90, 200, 110)),
+        cols = [('HEROES', 'on the latest version or newer', heroes, (90, 200, 110)),
                 ('OLD VERSION', 'time to update', old, (232, 170, 60)),
                 ('NO ADDON', 'grab it from #addons', none, (210, 70, 50))]
         gap = 14; cw = (X1 - X0 - gap * 2) / 3; lh = 34; top = Y0
@@ -270,9 +270,14 @@ def render(data, min_panels=0):
             for j, (r, v) in enumerate(lst[:room]):
                 ly = top + 98 + j * lh
                 col = CLASS_COLOR.get(r['cls'], TXT)
-                text(d, (cx + 18, ly), fit(d, r['name'], F(16, 'Bold'), cw - 110), F(16, 'Bold'), col)
                 tag = (f"v{v}" if v and v != '?' else '') if title != 'NO ADDON' else f"lvl {r['level']}"
-                if tag: text(d, (cx2 - 18, ly), tag, F(13, 'Medium'), MUTE, 'rm')
+                tcol = MUTE
+                # newer than the published release = a test build
+                if title == 'HEROES' and v and v != '?' and latest and vkey(v) > vkey(latest):
+                    tag, tcol = f"v{v} experimental", (180, 140, 255)
+                room_name = cw - 48 - (d.textlength(tag, font=F(13, 'Medium')) if tag else 0)
+                text(d, (cx + 18, ly), fit(d, r['name'], F(16, 'Bold'), room_name), F(16, 'Bold'), col)
+                if tag: text(d, (cx2 - 18, ly), tag, F(13, 'Medium'), tcol, 'rm')
             if len(lst) > room: text(d, (cx2 - 18, foot_y - 32), f"+{len(lst) - room} more", F(13, 'Medium'), MUTE, 'rm')
             if not lst: text(d, ((cx + cx2) // 2, top + 130), 'nobody', F(16, 'Medium'), MUTE, 'mm')
         im = panel(im, [X0, foot_y, X1, Y1], outline=(232, 185, 100, 110)); d = ImageDraw.Draw(im)
