@@ -130,7 +130,7 @@ local function onMessage(prefix, msg, channel, sender)
     -- party sync is the only thing that talks over the party channel
     if (channel == "PARTY" or channel == "RAID" or channel == "INSTANCE_CHAT") and ns.onParty then
       local k, r = msg:match("^(%u)%^?(.*)$")
-      if k == "S" or k == "P" then
+      if k == "S" or k == "P" or k == "T" then
         if ns.safe then ns.safe("party", ns.onParty, k, ns.canon(sender), { strsplit(SEP, r or "") }) else pcall(ns.onParty, k, ns.canon(sender), { strsplit(SEP, r or "") }) end
       end
     end
