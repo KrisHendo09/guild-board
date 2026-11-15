@@ -42,7 +42,7 @@ jobs:
           BLIZZARD_CLIENT_ID: ${{ secrets.BLIZZARD_CLIENT_ID }}
           BLIZZARD_CLIENT_SECRET: ${{ secrets.BLIZZARD_CLIENT_SECRET }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.GUILD_BOARD }}
-          DISCORD_MESSAGE_IDS: ${{ inputs.fresh_post && 'none' || vars.DISCORD_MESSAGE_IDS || '1571426762498252840,1571426772237418537,1571426778344591421' }}
+          DISCORD_MESSAGE_IDS: ${{ inputs.fresh_post && 'none' || vars.DISCORD_MESSAGE_IDS || '1571426762498252840,1571426772237418537,1571426778344591421,1571467844237918258' }}
           EDIT_ONLY: ${{ !inputs.fresh_post && '1' || '' }}
           ADD_PANELS: ${{ inputs.add_panels && 'true' || 'false' }}
         run: python tools/guild_armory.py
