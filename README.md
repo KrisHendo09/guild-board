@@ -61,6 +61,15 @@ Where to post what:
 - `/gb run` shows a report for the whole run. `/gb run last` covers the last fight.
 - `/gb sync` asks everyone online to resend.
 
+## Fish Focus
+
+Start fishing and Fish Focus does the rest. It turns the game sound up and mutes the music so the bobber splash is easy to hear, and it puts a bar on screen that counts down the cast. When you stop fishing, your sound settings go back to how they were.
+
+![Fish Focus bar while fishing](images/fish-focus.png)
+
+- When you hear the splash, click the bobber (or press your Interact key).
+- `/fishfocus` turns it off or back on.
+
 ## What is shared
 
 Guild Board only talks over the game's guild addon channel, so only your guild sees it.
