@@ -18,6 +18,41 @@ Small addons for World of Warcraft: Forever. Each folder is one addon.
 
 To update, download the new zip and replace the old folder.
 
+## Make a button for it (macro)
+
+You can type the commands in chat, or put them on a button:
+
+1. Press Enter, type `/macro`, press Enter again.
+2. Click **New**.
+3. Type a name (for example `Board`), click any icon, click **Okay**.
+4. Click in the big empty text box and type the command, for example `/gb`
+5. Drag the macro's icon from the top of that window onto an empty action bar slot.
+6. Close the macro window. Clicking the button now runs the command.
+
+Useful ones to make:
+
+| Button | Type this in the macro | What it does |
+|---|---|---|
+| Board | `/gb` | Opens the guild roster |
+| Run | `/gb run` | Opens the report for the dungeon or raid you just did |
+| Paste | `/cp` | Opens your own character summary (Claude Paste) |
+
+## Post it in Discord
+
+Every one of these windows opens with the text already highlighted.
+
+1. Click the button (or type the command).
+2. Press **Ctrl+C** to copy.
+3. Click into the Discord channel and press **Ctrl+V** to paste, then Enter.
+4. If Discord says the message is too long and offers to send it as a file, say yes. It posts as a small text file anyone can open.
+5. Back in game, press **Esc** to close the window.
+
+Where to post what:
+
+- **Guild roster** (`/gb`): the guild's roster channel, whenever someone wants a fresh copy. Only one person needs to post it, because everyone's addon holds the whole roster.
+- **Run report** (`/gb run`): after a dungeon or raid. Reset your damage meter before the first pull so the report only covers that run.
+- **Character summary** (`/cp`): send it to whoever is helping you with gear, talents or quests.
+
 ## Guild Board commands
 
 - `/gb` shows the roster and a "who can make what" list. Ctrl+C copies it for Discord.
