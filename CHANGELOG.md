@@ -2,6 +2,17 @@
 
 ## Guild Board
 
+### 1.5.0 (2026-11-15)
+- **Game Plan:** left-click the minimap button for your own checklist with an arrow to the next stop. Add things from the Tracker with + Plan, reorder with the up and down buttons, tick or remove steps. Quests check themselves off when turned in. Quest locations use Questie when it is installed. `/plan paste` takes a pasted list of steps; start a line with `[both]` to share it with your party.
+- **Tracker:** one window for upkeep and group play (right-click menu or `/gb track`), with Personal, Party, Share and Dungeon tabs.
+- **Party tab:** quests your group has in common, 5 at a time with More for up to 20, and a box on each quest to skip it.
+- **Share tab:** Share any quest a party member can take. Ask for a quest they have and their Guild Board shares it for them.
+- **Dungeon tab:** opens by itself when you zone into a dungeon. Who needs to repair or clear bags, where everyone is (area name, in range or not), quests for that dungeon and who has them, bosses down, one-click run report.
+- **Minimap button:** left-click is now Game Plan. Dungeons moved into the right-click menu, which also has Tracker, Sync guild, Guild window and Character Card.
+- **Sync guild** in the menu asks everyone online to resend their info, same as `/gb sync`.
+- Nothing new posts to chat or Discord. Party features use the silent addon channel and only see people who run Guild Board.
+- Known limits: the game gives addons no position inside a dungeon, so there are no party dots on a map, only area names and range. The arrow needs Questie for quest locations.
+
 ### 1.4.0 (2026-11-15)
 - Fixed: guildies with a two-part name showed up twice in needs, and "Send needs" could address a mail to yourself. Old duplicate entries are merged on login.
 - Fixed: the "Send needs" button was hidden behind the mail window; it now sits just outside its top right corner.

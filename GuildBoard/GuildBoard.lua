@@ -41,6 +41,7 @@ local function myProfs()
   end)
   return table.concat(out, ",")
 end
+ns.myProfs = function() return myProfs() end
 
 local function mySpec()
   if GuildBoardDB.mySpec and GuildBoardDB.mySpec ~= "" then return GuildBoardDB.mySpec end
@@ -109,6 +110,12 @@ local function store(key, class, level, zone, profs, note, ts, via, spec, ilvl, 
     spec = spec or "", ilvl = tonumber(ilvl) or 0, dps = tonumber(dps) or 0 }
 end
 
+-- "Sync guild" (minimap menu or /gb sync): everyone online with the addon resends their info right away
+ns.syncGuild = function()
+  pcall(broadcastSelf); send("R")
+  print("|cff33ff99Guild Board|r: asked everyone online to resend. Give it about 15 seconds.")
+end
+
 local function shareKnown()
   -- after a random wait, pass along what we know about members who are not online to say it themselves
   local delay = 3 + math.random() * 8
@@ -125,7 +132,17 @@ local function shareKnown()
 end
 
 local function onMessage(prefix, msg, channel, sender)
-  if prefix ~= PREFIX or channel ~= "GUILD" then return end
+  if prefix ~= PREFIX then return end
+  if channel ~= "GUILD" then
+    -- party sync is the only thing that talks over the party channel
+    if (channel == "PARTY" or channel == "RAID" or channel == "INSTANCE_CHAT") and ns.onParty then
+      local k, r = msg:match("^(%u)%^?(.*)$")
+      if k == "S" or k == "P" or k == "T" or k == "A" or k == "Z" then
+        if ns.safe then ns.safe("party", ns.onParty, k, ns.canon(sender), { strsplit(SEP, r or "") }) else pcall(ns.onParty, k, ns.canon(sender), { strsplit(SEP, r or "") }) end
+      end
+    end
+    return
+  end
   -- the guild channel echoes our own messages back; file them under the same key everything else uses for "me"
   sender = ns.canon(sender)     -- one name per person (see ns.canon in Core.lua); also catches our own echo
   local kind, rest = msg:match("^(%u)%^?(.*)$")
@@ -255,7 +272,7 @@ local function show(text)
     frame:EnableMouse(true); frame:SetMovable(true); frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", frame.StartMoving); frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
     local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    title:SetPoint("TOP", 0, -10); title:SetText("Guild Board: Ctrl+C copies it for Discord. Esc closes.")
+    title:SetPoint("TOP", 0, -10); title:SetText("Guild Board  (the Discord board updates on its own)   Esc closes")
     local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton"); close:SetPoint("TOPRIGHT", 2, 2)
     local scroll = CreateFrame("ScrollFrame", "GuildBoardScroll", frame, "UIPanelScrollFrameTemplate")
     scroll:SetPoint("TOPLEFT", 12, -32); scroll:SetPoint("BOTTOMRIGHT", -32, 12)
@@ -273,7 +290,7 @@ local function show(text)
     for _, k in ipairs({ "wantsText", "needsText", "socialText" }) do
       if ns[k] then local ok2, t = pcall(ns[k]); if ok2 and t then parts[#parts + 1] = t end end
     end
-    parts[#parts + 1] = "\n/gb bug what happened  = bug report     Minimap button: left-click dungeons, right-click this window"
+    parts[#parts + 1] = "\n/gb bug what happened  = bug report     Minimap button: left-click Game Plan, right-click menu (tracker, dungeons)"
     text = table.concat(parts, "\n")
   end
   frame.edit:SetText(text)
@@ -331,6 +348,10 @@ SlashCmdList["GUILDBOARD"] = function(arg)
   elseif cmd == "bug" then
     local ok, err = pcall(function() show(ns.bugText(rest)) end)
     if not ok then print("Guild Board error: " .. tostring(err)) end
+  elseif cmd == "track" or cmd == "tracker" then
+    if ns.toggleTracker then ns.toggleTracker() end
+  elseif cmd == "party" then
+    if ns.partySync then ns.partySync() end
   elseif cmd == "card" or cmd == "paste" then
     if ns.paste then ns.paste() end
   elseif cmd == "versions" or cmd == "version" then
@@ -342,8 +363,7 @@ SlashCmdList["GUILDBOARD"] = function(arg)
     if rest == "" then print("|cff33ff99Guild Board|r: features are needs, crafts, upgrades, mats, dungeons, quests, deaths, dings, hearths, partycheck")
     else ns.setFeature(rest:lower(), cmd == "enable") end
   elseif cmd == "sync" then
-    pcall(broadcastSelf); send("R")
-    print("|cff33ff99Guild Board|r: asked everyone online to resend. Give it 15 seconds, then /gb")
+    ns.syncGuild()
   else
     local ok, err = pcall(show)
     if not ok then print("Guild Board error: " .. tostring(err)) end
