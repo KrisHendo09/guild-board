@@ -1,5 +1,7 @@
 # Guild Board and friends: WoW Forever addons
 
+<img src="images/guild-board-logo.png" width="160" alt="Guild Board logo">
+
 Small addons for World of Warcraft: Forever. Each folder is one addon.
 
 | Addon | What it does | Command |
