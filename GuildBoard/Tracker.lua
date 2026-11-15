@@ -2,7 +2,7 @@
 --   Personal: Upkeep (repair, empty slots, bags, trainer, profession caps, reagents), quests ready to turn in,
 --             and the next items from Claude's list when Kris's Claude Tasks addon is loaded.
 --   Party:    what to fix first (quests to share, who needs to repair or empty bags), then the quests the group
---             has in common, current zone first, plus Kris's shared Claude list when he's in the group.
+--             has in common, current zone first, plus any plan Claude Tasks shares with you by name.
 -- Everything is worked out on your own PC. Items clear themselves when they're done; nothing to tick off.
 -- The gear button picks what each tab tracks (saved per character). Hides in combat. Only opens when you ask:
 -- minimap right-click menu or /gb track. X or Esc closes it.
@@ -13,17 +13,17 @@ local CT_PREFIX = "CTASKS1"
 local DEFAULTS = {
   repair = true, repairPct = 50, slots = true, bags = true, bagFree = 4, trainer = true, profcap = true,
   reagents = false, turnins = true, claude = true,
-  pshare = true, pquests = true, pupkeep = true, pgear = false, pdungeons = false, pclaude = true,
+  pshare = true, pquests = true, pupkeep = true, pgear = false, pdungeons = false, pclaude = false,   -- shared plan is opt-in
   hideCombat = true,
 }
 local LABELS = {
   { "Personal" },
   { "repair", "Repair at 50% or a broken item" }, { "slots", "Empty gear slots" }, { "bags", "Bags under 4 free" },
   { "trainer", "Class trainer visits" }, { "profcap", "Profession rank caps" }, { "reagents", "Reagents (ankhs, shards, ammo)" },
-  { "turnins", "Quests ready to turn in" }, { "claude", "Claude's list (Kris)" },
+  { "turnins", "Quests ready to turn in" }, { "claude", "Claude's list" },
   { "Party" },
   { "pshare", "Quests to share" }, { "pquests", "Shared quests in order" }, { "pupkeep", "Party repair and bags" },
-  { "pgear", "Gear check" }, { "pdungeons", "Dungeons everyone wants" }, { "pclaude", "Kris's shared list" },
+  { "pgear", "Gear check" }, { "pdungeons", "Dungeons everyone wants" }, { "pclaude", "Shared plan from your partner" },
   { "Window" }, { "hideCombat", "Hide in combat" },
 }
 
@@ -222,9 +222,18 @@ local function party(add, shareBtn)
   if opt("pclaude") then
     local src = ctasks
     if ClaudeTasks_List and ClaudeTasks_List.tasks and #ClaudeTasks_List.tasks > 0 then src = ClaudeTasks_List end   -- Kris's own copy
+    -- only tasks Claude addressed to you by name, or to "both"/"party". Untagged tasks are the sender's own, so a
+    -- random guildie who groups with Kris never sees his to-do list.
+    local me = (UnitName("player") or ""):lower()
     local list = {}
-    for _, t in ipairs(src.tasks or {}) do if t and (not t.who or t.who == "" or t.who:lower() == "both") then list[#list + 1] = t.text end end
-    if #list > 0 then add(GOLD .. "KRIS'S LIST|r", true); for _, t in ipairs(list) do add(t) end end
+    for _, t in pairs(src.tasks or {}) do
+      local w = t and t.who and t.who:lower() or ""
+      if w == "both" or w == "party" or (w ~= "" and src ~= ClaudeTasks_List and me:find(w, 1, true)) then list[#list + 1] = t.text end
+    end
+    if #list > 0 then
+      local from = src == ClaudeTasks_List and "YOUR SHARED PLAN" or ("PLAN FROM " .. (ns.display(src.from or "?")):upper())
+      add(GOLD .. from .. "|r", true); for _, t in ipairs(list) do add(t) end
+    end
   end
 
   if opt("pdungeons") and ns.dungeonByKey then
@@ -260,7 +269,13 @@ local function makeSettings()
   end
   local t = settings:CreateFontString(nil, "OVERLAY", "GameFontNormal"); t:SetPoint("TOPLEFT", 12, -10); t:SetText("What to track")
   local y = -32
+  local hasCT = ClaudeTasks_List ~= nil or (ctasks and ctasks.id ~= nil)
+  local shown = {}
   for _, l in ipairs(LABELS) do
+    if hasCT or (l[1] ~= "claude" and l[1] ~= "pclaude") then shown[#shown + 1] = l end
+  end
+  settings:SetHeight(40 + #shown * 20)
+  for _, l in ipairs(shown) do
     if not l[2] then
       local h = settings:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall"); h:SetPoint("TOPLEFT", 12, y - 4); h:SetText(l[1]:upper())
     else
