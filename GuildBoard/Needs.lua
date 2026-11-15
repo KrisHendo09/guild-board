@@ -150,7 +150,31 @@ ns.handlers.C = function(sender, f)
   if p.got >= total then db().crafts[sender] = { ts = ts, items = p.items }; pending[sender] = nil end
 end
 
+-- ===== new version notice =====
+local function myVersion()
+  local get = (C_AddOns and C_AddOns.GetAddOnMetadata) or GetAddOnMetadata
+  return (get and get("GuildBoard", "Version")) or "0"
+end
+local function newer(a, b)   -- is version a newer than b
+  local x, y = { tostring(a):match("(%d+)%.?(%d*)%.?(%d*)") }, { tostring(b):match("(%d+)%.?(%d*)%.?(%d*)") }
+  for i = 1, 3 do
+    local p, q = tonumber(x[i]) or 0, tonumber(y[i]) or 0
+    if p ~= q then return p > q end
+  end
+  return false
+end
+local told
+ns.handlers.V = function(sender, f)
+  local theirs = f[1]
+  if told or not theirs or not newer(theirs, myVersion()) then return end
+  told = true
+  C_Timer.After(8, function()
+    print(GREEN .. "Guild Board|r: " .. short(sender) .. " has version " .. theirs .. " (you have " .. myVersion() .. "). Update from the link pinned in #addons: github.com/KrisHendo09/guild-board/releases/latest")
+  end)
+end
+
 ns.broadcastExtra = function()
+  ns.send("V" .. SEP .. myVersion())
   broadcastNeeds(true)
   C_Timer.After(4, function() pcall(broadcastCrafts) end)
 end
