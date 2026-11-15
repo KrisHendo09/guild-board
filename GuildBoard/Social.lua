@@ -290,8 +290,16 @@ end
 
 -- ===== hearths and flight paths =====
 local function scanFlights()
-  if not NumTaxiNodes then return end
   db().myFlights = db().myFlights or {}
+  if C_TaxiMap and C_TaxiMap.GetAllTaxiNodes and GetTaxiMapID then
+    for _, node in ipairs(C_TaxiMap.GetAllTaxiNodes(GetTaxiMapID()) or {}) do
+      local st = node.state
+      local E = Enum and Enum.FlightPathState
+      if node.name and (not E or st == E.Reachable or st == E.Current) then db().myFlights[(node.name:gsub(",.*$", ""))] = true end
+    end
+    return
+  end
+  if not NumTaxiNodes then return end
   for i = 1, NumTaxiNodes() do
     local t = TaxiNodeGetType and TaxiNodeGetType(i)
     local name = TaxiNodeName(i)
