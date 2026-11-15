@@ -1,8 +1,12 @@
 ## Interface: 16001, 11509
 ## Title: Guild Board
-## Notes: Shares your level, zone and professions with guildmates who also run it. /gb to see everyone.
+## Notes: Tooltips show who in the guild needs an item, can make it, or would upgrade from it. Minimap button to flag dungeons. Alt+click an item to say you need it.
 ## Author: Kris + Claude
-## Version: 1.2.1
+## Version: 1.3.0
 ## SavedVariables: GuildBoardDB
 
+Core.lua
 GuildBoard.lua
+Needs.lua
+Extras.lua
+Social.lua
