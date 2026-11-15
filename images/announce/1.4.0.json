@@ -1,0 +1,9 @@
+{
+ "from": "Slixx",
+ "embeds": [
+  {"title": "🛠️  Guild Board 1.4.0 is out", "link": true,
+   "description": "Bug fix patch. Your reports got squashed, the minimap button moved outside the circle, and the addon now nags you itself when you fall behind.\n\n**[⬇️  Download 1.4.0](https://github.com/KrisHendo09/guild-board/releases/latest)**  then restart WoW",
+   "image": "announce/patch_notes_1_4_0.png"}
+ ],
+ "footer": "Something busted? Type /gb bug in game  ·  For the Horde"
+}
