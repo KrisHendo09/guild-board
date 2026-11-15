@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- The minimap button now sits outside the minimap's edge instead of inside it. Drag it around the ring as before.
 - Fixed: guildies with a two-part name (like Jay Spaceman) showed up twice in needs, and "Send needs" could address a mail to yourself. Old duplicate entries are merged on login. (reported by jspaceman)
 - Fixed: the "Send needs" button was hidden behind the mail window; it now sits just outside its top right corner. (reported by jspaceman)
 - Fixed: officers with a two-part name could not use the kill switch.

@@ -375,7 +375,9 @@ local function makeMinimapButton()
   b:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
   local function place()
     local a = math.rad(db().mmAngle or 200)
-    b:ClearAllPoints(); b:SetPoint("CENTER", Minimap, "CENTER", math.cos(a) * 80, math.sin(a) * 80)
+    -- ride just outside the minimap's edge (the modern minimap is bigger than the old fixed 80 px radius)
+    local r = ((Minimap:GetWidth() or 140) / 2) + 14
+    b:ClearAllPoints(); b:SetPoint("CENTER", Minimap, "CENTER", math.cos(a) * r, math.sin(a) * r)
   end
   place()
   b:SetScript("OnDragStart", function()
