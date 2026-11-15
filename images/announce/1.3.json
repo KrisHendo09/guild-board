@@ -7,6 +7,11 @@
    "image": "announce/guildboard_1_3.gif"
   },
   {
+   "title": "🙏  Until CurseForge approves us",
+   "description": "**I am once again asking you to manually download and install the update.**\nGrab it from the link above, unzip it into your AddOns folder, and restart WoW. Once CurseForge approves the project, the CurseForge app will keep it updated for you.",
+   "image": "announce/curseforge_on_the_way.gif"
+  },
+  {
    "title": "📜  Patch notes",
    "image": "announce/patch_notes_1_3.png"
   },
