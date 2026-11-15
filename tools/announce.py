@@ -26,8 +26,9 @@ embeds[-1]['footer'] = {'text': spec.get('footer', ''), 'icon_url': RAW + 'guild
 from datetime import datetime, timezone
 embeds[-1]['timestamp'] = datetime.now(timezone.utc).isoformat()
 ping = os.environ.get('PING') == 'everyone'
-body = {'username': 'Guild Board', 'avatar_url': RAW + 'guild-board-logo.png', 'content': '@everyone' if ping else '',
+body = {'username': spec.get('from', 'Guild Board'), 'content': '@everyone' if ping else '',
         'embeds': embeds, 'allowed_mentions': {'parse': ['everyone'] if ping else []}}
+if spec.get('avatar'): body['avatar_url'] = RAW + spec['avatar']      # no avatar: uses the picture set on the webhook in Discord
 req = urllib.request.Request(hook + '?wait=true', json.dumps(body).encode(), {'Content-Type': 'application/json', 'User-Agent': 'GuildBoard/3.0'})
 try:
     print('POSTED', json.load(urllib.request.urlopen(req)).get('id'))
