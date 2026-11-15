@@ -25,6 +25,12 @@ def profs_of(m):
             out.append((parts[0], int(parts[1])))
     return out
 
+ANSI = {"Warrior": 33, "Rogue": 33, "Paladin": 35, "Warlock": 35, "Demon Hunter": 35, "Hunter": 32,
+    "Monk": 32, "Evoker": 32, "Priest": 37, "Shaman": 34, "Mage": 36, "Druid": 31, "Death Knight": 31}
+
+def paint(text, code, bold=False):
+    return f"\u001b[{1 if bold else 0};{code}m{text}\u001b[0m"
+
 def cut(t, n):
     t = str(t or "")
     return t if len(t) <= n else t[:n - 1] + "."
@@ -32,19 +38,21 @@ def cut(t, n):
 def build(members, guild):
     rows = sorted(members.items(), key=lambda kv: (-(kv[1].get("level") or 0), kv[0]))
     by_prof, notes, lines = {}, [], []
-    lines.append(f"{'Name':<18} {'Lv':>2}  {'Class':<8} {'Zone':<12} Seen")
-    lines.append("-" * 50)
+    lines.append(paint(f"{'Name':<18} {'Lv':>2}  {'Class':<8} {'Zone':<12} Seen", 30))
+    lines.append(paint("-" * 50, 30))
     for key, m in rows:
         name = key.split("-")[0]
         spec = m.get("spec") or ""
         cls = m.get("class") or "?"
         what = spec if spec and spec != cls else cls
-        lines.append(f"{cut(name, 18):<18} {m.get('level', 0):>2}  {cut(what, 8):<8} {cut(m.get('zone') or '-', 12):<12} {seen(m.get('ts'))}")
+        c = ANSI.get(cls, 37)
+        lines.append(paint(f"{cut(name, 18):<18}", c, True) + f" {m.get('level', 0):>2}  " + paint(f"{cut(what, 8):<8}", c)
+                     + paint(f" {cut(m.get('zone') or '-', 12):<12} {seen(m.get('ts'))}", 30))
         for pn, rank in profs_of(m):
             by_prof.setdefault(pn, []).append((name, rank))
         if m.get("note"):
             notes.append(f"**{name}**: {m['note']}")
-    desc = f"**{len(rows)} members reporting**\n```\n" + "\n".join(lines) + "\n```"
+    desc = f"**{len(rows)} members reporting**\n```ansi\n" + "\n".join(lines) + "\n```"
     fields = []
     if by_prof:
         w = max(len(p) for p in by_prof)
@@ -56,7 +64,7 @@ def build(members, guild):
     return {"username": "Guild Board", "embeds": [{
         "title": f"{guild} roster",
         "description": desc[:4096],
-        "color": 0x5865F2,
+        "color": CLASS_COLOR.get(rows[0][1].get("class"), 0x5865F2) if rows else 0x5865F2,
         "fields": fields,
         "footer": {"text": "Install Guild Board from #addons · type /gb in game"},
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}],
