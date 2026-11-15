@@ -1,0 +1,16 @@
+{
+ "from": "Slixx",
+ "embeds": [
+  {"title": "📌  Guild Board: download and install", "link": true, "thumb": "guild-board-logo.png",
+   "description": "**[⬇️  Get the latest version](https://github.com/KrisHendo09/guild-board/releases/latest)**\nThis link always points to the newest release, so it never goes stale.\n​",
+   "fields": [
+    {"name": "1️⃣  Download", "value": "Open the link and click **GuildBoard.zip** under Assets"},
+    {"name": "2️⃣  Unzip", "value": "Drop the **GuildBoard** folder into\n`World of Warcraft\\_forever_\\Interface\\AddOns`\nReplace the old one if it asks"},
+    {"name": "3️⃣  Restart WoW", "value": "Fully close and reopen. Type `/gb` in game to check it loaded"},
+    {"name": "🔔  Out of date?", "value": "The addon tells you in game when a guildie has a newer version. Come back here and repeat"},
+    {"name": "🛠️  Something broken?", "value": "Type `/gb bug` in game and it gets to me"},
+    {"name": "⚙️  CurseForge", "value": "Auto updates are on the way once CurseForge approves the project"}
+   ]}
+ ],
+ "footer": "Push To Prod  ·  For the Horde"
+}
