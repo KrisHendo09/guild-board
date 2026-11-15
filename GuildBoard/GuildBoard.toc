@@ -4,6 +4,7 @@
 ## Author: Kris + Claude
 ## Version: 1.3.0
 ## SavedVariables: GuildBoardDB
+## X-Curse-Project-ID: 1806889
 
 Core.lua
 GuildBoard.lua
