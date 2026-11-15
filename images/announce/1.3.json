@@ -26,5 +26,10 @@
    ]
   }
  ],
- "footer": "Something busted? Type /gb bug in game  ·  CurseForge auto updates coming soon  ·  For the Horde"
+ "footer": "Something busted? Type /gb bug in game  ·  CurseForge auto updates coming soon  ·  For the Horde",
+ "replace": [
+  "1571460582828146715",
+  "1571460656203305019",
+  "1571460957895397514"
+ ]
 }

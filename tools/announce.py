@@ -29,6 +29,11 @@ ping = os.environ.get('PING') == 'everyone'
 body = {'username': spec.get('from', 'Guild Board'), 'content': '@everyone' if ping else '',
         'embeds': embeds, 'allowed_mentions': {'parse': ['everyone'] if ping else []}}
 if spec.get('avatar'): body['avatar_url'] = RAW + spec['avatar']      # no avatar: uses the picture set on the webhook in Discord
+for mid in spec.get('replace', []) if os.environ.get('CLEANUP') == 'true' else []:
+    try:
+        urllib.request.urlopen(urllib.request.Request(f'{hook}/messages/{mid}', method='DELETE', headers={'User-Agent': 'GuildBoard/3.0'})); print('DELETED', mid)
+    except urllib.error.HTTPError as e:
+        print('DELETE_SKIPPED', mid, e.code)      # 404 = already gone
 req = urllib.request.Request(hook + '?wait=true', json.dumps(body).encode(), {'Content-Type': 'application/json', 'User-Agent': 'GuildBoard/3.0'})
 try:
     print('POSTED', json.load(urllib.request.urlopen(req)).get('id'))
