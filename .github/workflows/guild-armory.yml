@@ -1,4 +1,4 @@
-# Posts the Push To Prod guild board (crafting board + roster panels + wall of shame) to #guild-board every hour,
+# Posts the Push To Prod guild board (crafting board + roster panels + wall of heroes) to #guild-board every hour,
 # built from the WoW Forever Armory API, so no addon or computer is needed.
 # Secrets: BLIZZARD_CLIENT_ID, BLIZZARD_CLIENT_SECRET, GUILD_BOARD (webhook URL).
 # It only edits the existing posts (EDIT_ONLY) so it can never spam the channel.
@@ -13,7 +13,7 @@ on:
         type: boolean
         default: false
       add_panels:
-        description: Post any new panel that has no Discord post yet (e.g. the Wall of Shame), edit the rest
+        description: Post any new panel that has no Discord post yet (e.g. the Wall of Heroes), edit the rest
         type: boolean
         default: false
 permissions:

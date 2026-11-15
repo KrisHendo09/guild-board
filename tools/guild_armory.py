@@ -220,7 +220,8 @@ def render(data, min_panels=0):
             y += rh
         panels.append((f'guild_roster_{ci + 1}.png', im))
 
-    # ---- wall of shame: active members without the addon (data/addon_users.json, exported from Kris's copy of the addon)
+    # ---- wall of heroes: who's on the newest addon, who's behind, who doesn't have it
+    #      (data/addon_users.json comes from Kris's copy of the addon; newest = latest GitHub release)
     def has_addon(name, users):
         n = name.lower()
         for k in users:
@@ -228,49 +229,62 @@ def render(data, min_panels=0):
             if k2 == n or k2.split('-')[0] == n.split(' ')[0] or n == k2.split(' ')[0]: return k
         return None
     def vkey(v):
-        try: return tuple(int(x) for x in str(v).split('.')[:3])
+        try: return tuple(int(x) for x in str(v).lstrip('v').split('.')[:3])
         except Exception: return (0,)
     shame = None
     try: addon = json.load(open(os.path.join(HERE, '..', 'data', 'addon_users.json')))
     except Exception: addon = None
     if addon is not None:
         users = addon.get('users', {})
-        newest = max((u['version'] for u in users.values() if u.get('version')), key=vkey, default=None)
-        crew, slackers, stale = [], [], []
+        latest = None
+        try:
+            req = urllib.request.Request('https://api.github.com/repos/KrisHendo09/guild-board/releases/latest', headers={'User-Agent': 'GuildBoard'})
+            latest = json.load(urllib.request.urlopen(req, timeout=10)).get('tag_name', '').lstrip('v') or None
+        except Exception: pass
+        known = [u['version'] for u in users.values() if u.get('version')]
+        if known and (not latest or vkey(max(known, key=vkey)) > vkey(latest)): latest = max(known, key=vkey)
+        heroes, old, none = [], [], []
         for r in rows:
             k = has_addon(r['name'], users)
-            if not k: slackers.append(r)
-            else:
-                crew.append(r); v = users[k].get('version')
-                if newest and v and vkey(v) < vkey(newest): stale.append((r, v))
+            v = users[k].get('version') if k else None
+            if not k: none.append((r, ''))
+            elif v and latest and vkey(v) < vkey(latest): old.append((r, v))
+            else: heroes.append((r, v or '?'))
         im = canvas()
-        im, d = header(im, 'Wall of Shame', f"No Guild Board addon  ·  seen in the last 7 days")
-        bar_y = Y1 - 96
-        cols = 3; gap = 12; cw = (X1 - X0 - gap * (cols - 1)) / cols; chh = 46
-        maxn = cols * int((bar_y - 16 - Y0) // (chh + gap))
-        if not slackers:
-            im = panel(im, [X0, Y0, X1, bar_y - 16], outline=(232, 185, 100, 110)); d = ImageDraw.Draw(im)
-            text(d, (W // 2, (Y0 + bar_y) // 2 - 16), 'Nobody. Everyone has the addon.', F(30, 'Bold'), GOLD, 'mm')
-            text(d, (W // 2, (Y0 + bar_y) // 2 + 22), 'The wall stays empty... for now', F(17, 'Medium'), MUTE, 'mm')
-        for i, r in enumerate(slackers[:maxn]):
-            cx = int(X0 + (i % cols) * (cw + gap)); cy = int(Y0 + (i // cols) * (chh + gap))
-            col = CLASS_COLOR.get(r['cls'], TXT)
-            im = panel(im, [cx, cy, int(cx + cw), cy + chh], alpha=215, radius=8, outline=(200, 60, 40, 140)); d = ImageDraw.Draw(im)
-            d.rounded_rectangle([cx, cy, cx + 5, cy + chh], 2, fill=col)
-            text(d, (cx + 18, cy + chh // 2), fit(d, r['name'], F(18, 'Bold'), cw - 90), F(18, 'Bold'), col)
-            text(d, (int(cx + cw) - 16, cy + chh // 2), f"lvl {r['level']}", F(14, 'Medium'), MUTE, 'rm')
-        if len(slackers) > maxn:
-            text(d, (X1, bar_y - 30), f"+{len(slackers) - maxn} more", F(14, 'Medium'), MUTE, 'rm')
-        # crew meter
-        im = panel(im, [X0, bar_y, X1, Y1], outline=(232, 185, 100, 110)); d = ImageDraw.Draw(im)
-        tot = max(len(rows), 1); pct = len(crew) / tot
-        text(d, (X0 + 20, bar_y + 26), 'ADDON CREW', F(12, 'Bold'), GOLD)
-        text(d, (X1 - 20, bar_y + 26), f"{len(crew)} of {len(rows)} active members", F(15, 'Bold'), TXT, 'rm')
-        d.rounded_rectangle([X0 + 20, bar_y + 44, X1 - 20, bar_y + 60], 8, fill=(40, 30, 22))
-        if pct > 0: d.rounded_rectangle([X0 + 20, bar_y + 44, X0 + 20 + int((X1 - X0 - 40) * pct), bar_y + 60], 8, fill=(196, 70, 36))
-        foot = ('Out of date: ' + ', '.join(f"{r['name']} ({v})" for r, v in stale)) if stale else 'Get it from the pin in #addons. Alts count once you log them in with it.'
-        text(d, (X0 + 20, bar_y + 78), fit(d, foot, F(13, 'Medium'), X1 - X0 - 40), F(13, 'Medium'), MUTE)
-        shame = ('guild_wall_of_shame.png', im)
+        im, d = header(im, 'Wall of Heroes', f"Guild Board addon  ·  latest is {latest or '?'}  ·  active in the last 7 days")
+        cols = [('HEROES', 'on the latest version', heroes, (90, 200, 110)),
+                ('OLD VERSION', 'time to update', old, (232, 170, 60)),
+                ('NO ADDON', 'grab it from #addons', none, (210, 70, 50))]
+        gap = 14; cw = (X1 - X0 - gap * 2) / 3; lh = 34; top = Y0
+        foot_y = Y1 - 56
+        for ci, (title, sub, lst, acc) in enumerate(cols):
+            cx = int(X0 + ci * (cw + gap)); cx2 = int(cx + cw)
+            im = panel(im, [cx, top, cx2, foot_y - 12], outline=acc + (150,)); d = ImageDraw.Draw(im)
+            d.rounded_rectangle([cx, top, cx2, top + 5], 2, fill=acc)
+            text(d, (cx + 18, top + 32), title, F(19, 'Bold'), acc)
+            text(d, (cx2 - 18, top + 32), str(len(lst)), F(26, 'Bold'), TXT, 'rm')
+            text(d, (cx + 18, top + 58), sub, F(13, 'Medium'), MUTE)
+            d.line([cx + 18, top + 76, cx2 - 18, top + 76], fill=acc + (90,))
+            room = int((foot_y - 24 - (top + 96)) // lh)
+            for j, (r, v) in enumerate(lst[:room]):
+                ly = top + 98 + j * lh
+                col = CLASS_COLOR.get(r['cls'], TXT)
+                text(d, (cx + 18, ly), fit(d, r['name'], F(16, 'Bold'), cw - 110), F(16, 'Bold'), col)
+                tag = (f"v{v}" if v and v != '?' else '') if title != 'NO ADDON' else f"lvl {r['level']}"
+                if tag: text(d, (cx2 - 18, ly), tag, F(13, 'Medium'), MUTE, 'rm')
+            if len(lst) > room: text(d, (cx2 - 18, foot_y - 32), f"+{len(lst) - room} more", F(13, 'Medium'), MUTE, 'rm')
+            if not lst: text(d, ((cx + cx2) // 2, top + 130), 'nobody', F(16, 'Medium'), MUTE, 'mm')
+        im = panel(im, [X0, foot_y, X1, Y1], outline=(232, 185, 100, 110)); d = ImageDraw.Draw(im)
+        tot = max(len(rows), 1); have = len(heroes) + len(old)
+        text(d, (X0 + 20, foot_y + 28), f"ADDON CREW  {have} of {len(rows)}", F(13, 'Bold'), GOLD)
+        bx = X0 + 250
+        d.rounded_rectangle([bx, foot_y + 20, X1 - 20, foot_y + 36], 8, fill=(40, 30, 22))
+        w = X1 - 20 - bx
+        if heroes: d.rounded_rectangle([bx, foot_y + 20, bx + int(w * len(heroes) / tot), foot_y + 36], 8, fill=(90, 200, 110))
+        if old:
+            x0 = bx + int(w * len(heroes) / tot)
+            d.rounded_rectangle([x0, foot_y + 20, x0 + int(w * len(old) / tot), foot_y + 36], 8, fill=(232, 170, 60))
+        shame = ('guild_wall_of_heroes.png', im)
 
     # keep the same number of Discord posts when the roster shrinks: same-size board with a short note
     n = len(panels)
