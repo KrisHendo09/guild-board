@@ -381,6 +381,11 @@ local function toggleMenu(anchor)
       { "Guild window", function() SlashCmdList["GUILDBOARD"]("") end },
       { "Character Card", function() if ns.paste then ns.paste() end end },
     }
+    -- Kris's private Claude Tasks list, only when that addon is installed
+    if SlashCmdList and SlashCmdList["CLAUDETASKS"] then
+      table.insert(items, 1, { "Claude list", function() SlashCmdList["CLAUDETASKS"]("") end })
+    end
+    menu:SetHeight(16 + #items * 26)
     for i, it in ipairs(items) do
       local b = CreateFrame("Button", nil, menu, "UIPanelButtonTemplate")
       b:SetSize(134, 22); b:SetPoint("TOP", 0, -8 - (i - 1) * 26); b:SetText(it[1])
