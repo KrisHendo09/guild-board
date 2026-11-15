@@ -1,0 +1,7 @@
+## Interface: 16001, 11509
+## Title: Fish Focus
+## Notes: While fishing: cranks splash sound, mutes music/ambience, keeps sound on when alt-tabbed, and shows a big cast timer. /fishfocus to toggle.
+## Author: Claude for Kris
+## Version: 1.0
+## SavedVariables: FishFocusDB
+FishFocus.lua

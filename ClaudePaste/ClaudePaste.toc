@@ -1,0 +1,7 @@
+## Interface: 16001, 11509
+## Title: Claude Paste
+## Notes: Type /cp to get a copy-and-paste summary of your character (gear, bags, quests, talents, professions).
+## Author: Kris + Claude
+## Version: 1.0
+
+ClaudePaste.lua
