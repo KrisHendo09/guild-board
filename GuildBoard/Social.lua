@@ -246,7 +246,12 @@ end
 
 local function onDeath()
   if ns.featureOff("deaths") then return end
+  -- Forever forbids addons from reading the combat log, so the killer is taken from your target if it was fighting you
   local killer, klvl = "something", ""
+  if UnitExists("target") and UnitCanAttack and UnitCanAttack("player", "target") then
+    killer = UnitName("target") or killer
+    local l = UnitLevel("target"); klvl = l and (l < 0 and "??" or tostring(l)) or ""
+  end
   if lastHit and time() - lastHit.t <= 10 then killer, klvl = lastHit.name, lastHit.level end
   local lvl, zone, ts = UnitLevel("player") or 0, GetRealZoneText() or "", time()
   addDeath(me(), killer, klvl, lvl, zone, ts)
@@ -419,10 +424,9 @@ end
 
 local ev = CreateFrame("Frame")
 for _, e in ipairs({ "PLAYER_LOGIN", "GUILD_ROSTER_UPDATE", "QUEST_LOG_UPDATE", "ZONE_CHANGED_NEW_AREA", "PLAYER_DEAD",
-  "COMBAT_LOG_EVENT_UNFILTERED", "TAXIMAP_OPENED", "HEARTHSTONE_BOUND", "PLAYER_ENTERING_WORLD" }) do pcall(ev.RegisterEvent, ev, e) end
+  "TAXIMAP_OPENED", "HEARTHSTONE_BOUND", "PLAYER_ENTERING_WORLD" }) do pcall(ev.RegisterEvent, ev, e) end
 local qTimer
 ev:SetScript("OnEvent", function(_, e)
-  if e == "COMBAT_LOG_EVENT_UNFILTERED" then ns.safe("deaths", onCombatLog); return end
   if e == "PLAYER_LOGIN" then
     C_Timer.NewTicker(60, function()
       if GuildRoster then pcall(GuildRoster) elseif C_GuildInfo and C_GuildInfo.GuildRoster then pcall(C_GuildInfo.GuildRoster) end

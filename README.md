@@ -71,6 +71,8 @@ No commands needed for most of it. It works through tooltips and one minimap but
 - Left-click: tick the dungeons you want to run. Friends in level range get a heads-up. A tick turns off by itself when you click it again, leave that dungeon after killing 3+ bosses, out-level it, or after 48 hours.
 - Right-click: the guild window.
 
+![Dungeon picker from the minimap button](images/dungeon-picker.png)
+
 **At the mailbox:** a **Send needs** button fills in a mail to whoever needs something you're carrying. You still click Send.
 
 **Guild window (`/gb` or right-click the minimap button)**
