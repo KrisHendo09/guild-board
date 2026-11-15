@@ -78,7 +78,7 @@ end
 -- ===== saved data repair and migration =====
 local SHAPES = { members = "table", needs = "table", crafts = "table", myNeeds = "table", myCrafts = "table", gear = "table",
   wants = "table", myWants = "table", quests = "table", deaths = "table", hearths = "table", myFlights = "table",
-  errors = "table", guildErrors = "table", killswitch = "table", myNote = "string", mySpec = "string", mmAngle = "number", schema = "number" }
+  errors = "table", guildErrors = "table", killswitch = "table", switchLog = "table", myNote = "string", mySpec = "string", mmAngle = "number", schema = "number" }
 
 local function repair()
   if type(GuildBoardDB) ~= "table" then GuildBoardDB = {} end
@@ -146,14 +146,20 @@ ns.handlers.X = function(sender, f)
   local feature, onoff = f[1], f[2]
   if not feature or feature == "" or not isOfficer(sender) then return end
   GuildBoardDB.killswitch = GuildBoardDB.killswitch or {}
+  local who = sender:gsub("%-.*$", "")
+  GuildBoardDB.switchLog = type(GuildBoardDB.switchLog) == "table" and GuildBoardDB.switchLog or {}
   if onoff == "off" then
     if not GuildBoardDB.killswitch[feature] then
-      print(GREEN .. "Guild Board|r: " .. sender:gsub("%-.*$", "") .. " switched off " .. feature .. " for the guild until a fix ships.")
+      print(GREEN .. "Guild Board|r: " .. who .. " switched off " .. feature .. " for the guild until a fix ships.")
     end
-    GuildBoardDB.killswitch[feature] = time()
+    GuildBoardDB.killswitch[feature] = { by = who, at = time() }
   else
+    if GuildBoardDB.killswitch[feature] then print(GREEN .. "Guild Board|r: " .. who .. " switched " .. feature .. " back on.") end
     GuildBoardDB.killswitch[feature] = nil
   end
+  -- keep a history of who flipped what, newest first
+  table.insert(GuildBoardDB.switchLog, 1, { feature = feature, state = onoff, by = who, at = time() })
+  while #GuildBoardDB.switchLog > 50 do table.remove(GuildBoardDB.switchLog) end
 end
 
 function ns.setFeature(feature, on)
@@ -172,7 +178,9 @@ function ns.bugText(note)
   L[#L + 1] = "Character level " .. (UnitLevel("player") or "?") .. " " .. (UnitClass("player") or "?") .. ", in " .. (GetRealZoneText() or "?")
   local off = {}
   for k in pairs(disabledThisSession) do off[#off + 1] = k .. " (paused)" end
-  for k in pairs(GuildBoardDB.killswitch or {}) do off[#off + 1] = k .. " (officer off)" end
+  for k, v in pairs(GuildBoardDB.killswitch or {}) do
+    off[#off + 1] = k .. " (switched off by " .. (type(v) == "table" and (v.by or "?") .. " " .. date("%m-%d %H:%M", v.at or 0) or "an officer") .. ")"
+  end
   if #off > 0 then L[#L + 1] = "Switched off: " .. table.concat(off, ", ") end
   L[#L + 1] = ""
   L[#L + 1] = "What happened: " .. (note and note ~= "" and note or "(type it here before you copy)")
@@ -184,6 +192,15 @@ function ns.bugText(note)
     L[#L + 1] = string.format("[%s] x%d %s (v%s): %s", x.feature or "?", x.count or 1, date("%m-%d %H:%M", x.last or 0), x.ver or "?", x.msg or "?")
   end
   L[#L + 1] = ""
+  local log = GuildBoardDB.switchLog or {}
+  if #log > 0 then
+    L[#L + 1] = "Officer switch history:"
+    for i, x in ipairs(log) do
+      if i > 5 then break end
+      L[#L + 1] = string.format("  %s %s turned %s %s", date("%m-%d %H:%M", x.at or 0), x.by or "?", x.feature or "?", x.state or "?")
+    end
+    L[#L + 1] = ""
+  end
   L[#L + 1] = "Post this in #addons on Discord or at github.com/KrisHendo09/guild-board/issues"
   return table.concat(L, "\n")
 end
