@@ -363,6 +363,33 @@ local function togglePicker(anchor)
   picker:Show(); ns.refreshPicker()
 end
 
+-- right-click menu on the minimap button
+local menu
+local function toggleMenu(anchor)
+  if not menu then
+    menu = CreateFrame("Frame", "GuildBoardMenu", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
+    menu:SetSize(150, 92); menu:SetFrameStrata("DIALOG")
+    if menu.SetBackdrop then
+      menu:SetBackdrop({ bgFile = "Interface\\ChatFrame\\ChatFrameBackground", edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 12,
+        insets = { left = 3, right = 3, top = 3, bottom = 3 } })
+      menu:SetBackdropColor(0, 0, 0, 0.92)
+    end
+    local items = {
+      { "Party Sync", function() if ns.partySync then ns.partySync() end end },
+      { "Guild window", function() SlashCmdList["GUILDBOARD"]("") end },
+      { "Character Card", function() if ns.paste then ns.paste() end end },
+    }
+    for i, it in ipairs(items) do
+      local b = CreateFrame("Button", nil, menu, "UIPanelButtonTemplate")
+      b:SetSize(134, 22); b:SetPoint("TOP", 0, -8 - (i - 1) * 26); b:SetText(it[1])
+      b:SetScript("OnClick", function() menu:Hide(); local ok, err = pcall(it[2]); if not ok then print("Guild Board: " .. tostring(err)) end end)
+    end
+    tinsert(UISpecialFrames, "GuildBoardMenu")
+  end
+  if menu:IsShown() then menu:Hide(); return end
+  menu:ClearAllPoints(); menu:SetPoint("TOPRIGHT", anchor, "BOTTOMLEFT", 0, 0); menu:Show()
+end
+
 local function makeMinimapButton()
   if not Minimap then return end
   local b = CreateFrame("Button", "GuildBoardMinimapButton", Minimap)
@@ -390,12 +417,12 @@ local function makeMinimapButton()
   b:SetScript("OnDragStop", function() b:SetScript("OnUpdate", nil) end)
   b:SetScript("OnClick", function(_, btn)
     if IsShiftKeyDown() and ns.paste then ns.paste()
-    elseif btn == "RightButton" then SlashCmdList["GUILDBOARD"]("") else togglePicker(b) end
+    elseif btn == "RightButton" then toggleMenu(b) else togglePicker(b) end
   end)
   b:SetScript("OnEnter", function()
     GameTooltip:SetOwner(b, "ANCHOR_LEFT"); GameTooltip:SetText("Guild Board")
     GameTooltip:AddLine("Left-click: pick dungeons you want to run", 1, 1, 1)
-    GameTooltip:AddLine("Right-click: guild window", 1, 1, 1)
+    GameTooltip:AddLine("Right-click: Party Sync, guild window, Character Card", 1, 1, 1)
     GameTooltip:AddLine("Shift+click: Character Card (copy your character to paste)", 1, 1, 1)
     GameTooltip:AddLine("Alt+click any item: I need this", 1, 1, 1)
     GameTooltip:Show()

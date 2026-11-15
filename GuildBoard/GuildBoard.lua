@@ -125,7 +125,17 @@ local function shareKnown()
 end
 
 local function onMessage(prefix, msg, channel, sender)
-  if prefix ~= PREFIX or channel ~= "GUILD" then return end
+  if prefix ~= PREFIX then return end
+  if channel ~= "GUILD" then
+    -- party sync is the only thing that talks over the party channel
+    if (channel == "PARTY" or channel == "RAID" or channel == "INSTANCE_CHAT") and ns.onParty then
+      local k, r = msg:match("^(%u)%^?(.*)$")
+      if k == "S" or k == "P" then
+        if ns.safe then ns.safe("party", ns.onParty, k, ns.canon(sender), { strsplit(SEP, r or "") }) else pcall(ns.onParty, k, ns.canon(sender), { strsplit(SEP, r or "") }) end
+      end
+    end
+    return
+  end
   -- the guild channel echoes our own messages back; file them under the same key everything else uses for "me"
   sender = ns.canon(sender)     -- one name per person (see ns.canon in Core.lua); also catches our own echo
   local kind, rest = msg:match("^(%u)%^?(.*)$")
@@ -331,6 +341,8 @@ SlashCmdList["GUILDBOARD"] = function(arg)
   elseif cmd == "bug" then
     local ok, err = pcall(function() show(ns.bugText(rest)) end)
     if not ok then print("Guild Board error: " .. tostring(err)) end
+  elseif cmd == "party" then
+    if ns.partySync then ns.partySync() end
   elseif cmd == "card" or cmd == "paste" then
     if ns.paste then ns.paste() end
   elseif cmd == "versions" or cmd == "version" then
