@@ -20,15 +20,19 @@ local function isFishing()
   if name and name:find("Fishing") then return true, startMS, endMS end
 end
 
+-- your normal sound settings are kept in FishFocusDB.saved until they are put back, so a logout, /reload,
+-- crash or disconnect mid-fishing can't leave your music and voices muted for good
 local function applySound()
   if saved then return end
   saved = {}
   for k, v in pairs(CVARS) do saved[k] = GetCVar(k); SetCVar(k, v) end
+  FishFocusDB.saved = saved
 end
 local function restoreSound()
+  saved = saved or FishFocusDB.saved
   if not saved then return end
   for k, v in pairs(saved) do if v then SetCVar(k, v) end end
-  saved = nil
+  saved = nil; FishFocusDB.saved = nil
 end
 
 bar:SetScript("OnUpdate", function(self)
@@ -42,9 +46,12 @@ bar:SetScript("OnUpdate", function(self)
 end)
 
 local f = CreateFrame("Frame")
+f:RegisterEvent("PLAYER_LOGIN")
+f:RegisterEvent("PLAYER_LOGOUT")
 f:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_START", "player")
 f:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_STOP", "player")
 f:SetScript("OnEvent", function(_, ev)
+  if ev == "PLAYER_LOGIN" or ev == "PLAYER_LOGOUT" then restoreSound(); return end   -- never stay stuck in fishing sound
   if not FishFocusDB.enabled then return end
   if ev == "UNIT_SPELLCAST_CHANNEL_START" then
     local yes, s, e = isFishing()
