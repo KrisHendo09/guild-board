@@ -330,6 +330,8 @@ SlashCmdList["GUILDBOARD"] = function(arg)
   elseif cmd == "bug" then
     local ok, err = pcall(function() show(ns.bugText(rest)) end)
     if not ok then print("Guild Board error: " .. tostring(err)) end
+  elseif cmd == "paste" then
+    if ns.paste then ns.paste() end
   elseif cmd == "versions" or cmd == "version" then
     local ok, err = pcall(function() show(ns.versionsText()) end)
     if not ok then print("Guild Board error: " .. tostring(err)) end

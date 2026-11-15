@@ -11,3 +11,4 @@ GuildBoard.lua
 Needs.lua
 Extras.lua
 Social.lua
+Paste.lua
