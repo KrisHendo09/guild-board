@@ -7,6 +7,11 @@ on:
   schedule:
     - cron: '7 * * * *'
   workflow_dispatch:
+    inputs:
+      fresh_post:
+        description: Post brand new panels (only after the old posts were deleted)
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
@@ -27,6 +32,6 @@ jobs:
           BLIZZARD_CLIENT_ID: ${{ secrets.BLIZZARD_CLIENT_ID }}
           BLIZZARD_CLIENT_SECRET: ${{ secrets.BLIZZARD_CLIENT_SECRET }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || secrets.GUILD_BOARD }}
-          DISCORD_MESSAGE_IDS: ${{ vars.DISCORD_MESSAGE_IDS || '1571388348696764568,1571400510173614100,1571400516792094772' }}
-          EDIT_ONLY: '1'
+          DISCORD_MESSAGE_IDS: ${{ inputs.fresh_post && 'none' || vars.DISCORD_MESSAGE_IDS || '1571388348696764568,1571400510173614100,1571400516792094772' }}
+          EDIT_ONLY: ${{ !inputs.fresh_post && '1' || '' }}
         run: python tools/guild_armory.py

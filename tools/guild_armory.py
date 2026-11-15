@@ -185,6 +185,7 @@ def send(paths):
     try: state = json.load(open(STATE, encoding='utf-8-sig'))
     except Exception: state = {}
     ids = [x for x in os.environ.get('DISCORD_MESSAGE_IDS', '').split(',') if x.strip()] or state.get('message_ids') or ([state['message_id']] if state.get('message_id') else [])
+    if os.environ.get('DISCORD_MESSAGE_IDS') == 'none': ids = []
     out = []; did = []
     try:
         for i, p in enumerate(paths):
