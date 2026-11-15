@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- The separate Claude Paste addon is retired. Its feature lives in Guild Board now; you can delete the old ClaudePaste folder.
 - Claude Paste is built in: Shift+click the minimap button (or /gb paste, /cp) to copy your character summary.
 - Out of date? The addon now nags you on screen with a raid warning at login and every 45 minutes until you update.
 - `/gb versions` shows which guildies are on which version (green = newest, orange = needs to update).

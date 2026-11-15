@@ -7,7 +7,6 @@ Small addons for World of Warcraft: Forever. Each folder is one addon.
 | Addon | What it does | Command |
 |---|---|---|
 | **Guild Board** | Built for a guild of friends. Tooltips show who in the guild needs an item, can make it, could use it to level a profession, or would get an upgrade from it. Flag dungeons you want to run from the minimap button. Plus shared quests, a death log, level-up popups and a guild window with alts grouped under their main. | `/gb` or the minimap button |
-| **Claude Paste** | One click gives you a copy-and-paste summary of your character: gear, talents, quests, bags, professions. | `/cp` |
 | **Fish Focus** | While you fish it turns the game sound up, mutes music, and shows a cast bar, so the bobber splash is easy to catch. | `/fishfocus` |
 
 ## Install
@@ -41,7 +40,7 @@ Useful ones to make:
 |---|---|---|
 | Board | `/gb` | Opens the guild roster |
 | Run | `/gb run` | Opens the report for the dungeon or raid you just did |
-| Paste | `/cp` | Opens your own character summary (Claude Paste) |
+| Paste | Shift+click the minimap button, `/gb paste` or `/cp` | Your character summary to copy and paste (Claude Paste is now built into Guild Board) |
 
 ## Post it in Discord
 
