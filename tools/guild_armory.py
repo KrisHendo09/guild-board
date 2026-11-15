@@ -220,13 +220,66 @@ def render(data, min_panels=0):
             y += rh
         panels.append((f'guild_roster_{ci + 1}.png', im))
 
+    # ---- wall of shame: active members without the addon (data/addon_users.json, exported from Kris's copy of the addon)
+    def has_addon(name, users):
+        n = name.lower()
+        for k in users:
+            k2 = k.lower()
+            if k2 == n or k2.split('-')[0] == n.split(' ')[0] or n == k2.split(' ')[0]: return k
+        return None
+    def vkey(v):
+        try: return tuple(int(x) for x in str(v).split('.')[:3])
+        except Exception: return (0,)
+    shame = None
+    try: addon = json.load(open(os.path.join(HERE, '..', 'data', 'addon_users.json')))
+    except Exception: addon = None
+    if addon is not None:
+        users = addon.get('users', {})
+        newest = max((u['version'] for u in users.values() if u.get('version')), key=vkey, default=None)
+        crew, slackers, stale = [], [], []
+        for r in rows:
+            k = has_addon(r['name'], users)
+            if not k: slackers.append(r)
+            else:
+                crew.append(r); v = users[k].get('version')
+                if newest and v and vkey(v) < vkey(newest): stale.append((r, v))
+        im = canvas()
+        im, d = header(im, 'Wall of Shame', f"No Guild Board addon  ·  seen in the last 7 days")
+        bar_y = Y1 - 96
+        cols = 3; gap = 12; cw = (X1 - X0 - gap * (cols - 1)) / cols; chh = 46
+        maxn = cols * int((bar_y - 16 - Y0) // (chh + gap))
+        if not slackers:
+            im = panel(im, [X0, Y0, X1, bar_y - 16], outline=(232, 185, 100, 110)); d = ImageDraw.Draw(im)
+            text(d, (W // 2, (Y0 + bar_y) // 2 - 16), 'Nobody. Everyone has the addon.', F(30, 'Bold'), GOLD, 'mm')
+            text(d, (W // 2, (Y0 + bar_y) // 2 + 22), 'The wall stays empty... for now', F(17, 'Medium'), MUTE, 'mm')
+        for i, r in enumerate(slackers[:maxn]):
+            cx = int(X0 + (i % cols) * (cw + gap)); cy = int(Y0 + (i // cols) * (chh + gap))
+            col = CLASS_COLOR.get(r['cls'], TXT)
+            im = panel(im, [cx, cy, int(cx + cw), cy + chh], alpha=215, radius=8, outline=(200, 60, 40, 140)); d = ImageDraw.Draw(im)
+            d.rounded_rectangle([cx, cy, cx + 5, cy + chh], 2, fill=col)
+            text(d, (cx + 18, cy + chh // 2), fit(d, r['name'], F(18, 'Bold'), cw - 90), F(18, 'Bold'), col)
+            text(d, (int(cx + cw) - 16, cy + chh // 2), f"lvl {r['level']}", F(14, 'Medium'), MUTE, 'rm')
+        if len(slackers) > maxn:
+            text(d, (X1, bar_y - 30), f"+{len(slackers) - maxn} more", F(14, 'Medium'), MUTE, 'rm')
+        # crew meter
+        im = panel(im, [X0, bar_y, X1, Y1], outline=(232, 185, 100, 110)); d = ImageDraw.Draw(im)
+        tot = max(len(rows), 1); pct = len(crew) / tot
+        text(d, (X0 + 20, bar_y + 26), 'ADDON CREW', F(12, 'Bold'), GOLD)
+        text(d, (X1 - 20, bar_y + 26), f"{len(crew)} of {len(rows)} active members", F(15, 'Bold'), TXT, 'rm')
+        d.rounded_rectangle([X0 + 20, bar_y + 44, X1 - 20, bar_y + 60], 8, fill=(40, 30, 22))
+        if pct > 0: d.rounded_rectangle([X0 + 20, bar_y + 44, X0 + 20 + int((X1 - X0 - 40) * pct), bar_y + 60], 8, fill=(196, 70, 36))
+        foot = ('Out of date: ' + ', '.join(f"{r['name']} ({v})" for r, v in stale)) if stale else 'Get it from the pin in #addons. Alts count once you log them in with it.'
+        text(d, (X0 + 20, bar_y + 78), fit(d, foot, F(13, 'Medium'), X1 - X0 - 40), F(13, 'Medium'), MUTE)
+        shame = ('guild_wall_of_shame.png', im)
+
     # keep the same number of Discord posts when the roster shrinks: same-size board with a short note
     n = len(panels)
-    while len(panels) < min_panels:
+    while len(panels) < (min_panels - 1 if shame else min_panels):
         im = canvas()
         im, d = header(im, 'Guild Roster', f"{len(rows)} active{away_note}")
         text(d, (W // 2, (Y0 + Y1) // 2), "That's everyone active this week.", F(26, 'SemiBold'), MUTE, 'mm')
         panels.append((f'guild_roster_spare_{len(panels) - n + 1}.png', im))
+    if shame: panels.append(shame)          # always the last Discord post
     paths = []
     for name, im in panels:
         p = os.path.join(OUT, name); im.convert('RGB').save(p, optimize=True); paths.append(p)
@@ -261,7 +314,7 @@ def send(paths):
                 except urllib.error.HTTPError as e:
                     if e.code != 404: raise
                     if os.environ.get('EDIT_ONLY'): raise SystemExit(f'MESSAGE_GONE panel {i + 1}: refusing to post a duplicate')
-            if not done and os.environ.get('EDIT_ONLY'):
+            if not done and os.environ.get('EDIT_ONLY') and not (os.environ.get('ADD_PANELS') == 'true' and not mid):
                 print(f'NEW_PANEL_NEEDED panel {i + 1}: add its id to DISCORD_MESSAGE_IDS'); continue
             if not done:
                 payload['username'] = 'Guild Board'; body, H = multipart(payload, p)

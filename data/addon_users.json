@@ -1,0 +1,30 @@
+{
+ "note": "Who has the Guild Board addon, as seen by the exporter's copy of the addon in the last 30 days.",
+ "updated": 1794736731,
+ "users": {
+  "Blexas Talafreako": {
+   "class": "Hunter",
+   "level": 23,
+   "seen": 1794704778,
+   "version": null
+  },
+  "Daddy Cumulonimbus": {
+   "class": "Shaman",
+   "level": 23,
+   "seen": 1794736126,
+   "version": null
+  },
+  "Doggie Kruger": {
+   "class": "Warrior",
+   "level": 16,
+   "seen": 1794723237,
+   "version": null
+  },
+  "Yapper Supreme": {
+   "class": "Rogue",
+   "level": 10,
+   "seen": 1794709691,
+   "version": null
+  }
+ }
+}
