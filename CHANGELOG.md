@@ -1,17 +1,17 @@
 # Changelog
 
-## Unreleased
-- The minimap button now sits outside the minimap's edge instead of inside it. Drag it around the ring as before.
+## Guild Board
+
+### 1.4.0 (2026-11-15)
 - Fixed: guildies with a two-part name (like Jay Spaceman) showed up twice in needs, and "Send needs" could address a mail to yourself. Old duplicate entries are merged on login. (reported by jspaceman)
 - Fixed: the "Send needs" button was hidden behind the mail window; it now sits just outside its top right corner. (reported by jspaceman)
 - Fixed: officers with a two-part name could not use the kill switch.
 - Fixed: bug reports showed "(nil)" for the game build.
+- The minimap button now sits outside the minimap's edge instead of inside it. Drag it around the ring as before.
 - The separate Claude Paste addon is retired. Its feature lives in Guild Board now; you can delete the old ClaudePaste folder.
 - Claude Paste is built in: Shift+click the minimap button (or /gb paste, /cp) to copy your character summary.
 - Out of date? The addon now nags you on screen with a raid warning at login and every 45 minutes until you update.
 - `/gb versions` shows which guildies are on which version (green = newest, orange = needs to update).
-
-## Guild Board
 
 ### 1.3.1 (2026-11-15)
 - Officer kill switch now records who flipped a feature and keeps a history (who, what, when), shown in `/gb bug`. Everyone also sees a chat line when a feature is switched back on.
@@ -51,12 +51,15 @@ Big one, built for a guild of friends. Everything stays in game.
 - First version: level, class, zone, professions and a note shared over the guild addon channel, with relaying for offline members.
 - `/gb` roster window with a "who can make what" list.
 
-## Claude Paste
+## Claude Paste (retired in Guild Board 1.4.0, now built in)
 
 ### 1.0 (2026-11-14)
 - First version: `/cp` opens a window with character, stats, professions, gear, talents, quests and bags, ready to copy.
 
 ## Fish Focus
+
+### 1.0.1 (2026-11-15)
+- Fixed: a /reload, logout or disconnect while fishing could leave your music, ambience and voices muted. Your normal sound now always comes back.
 
 ### 1.0 (2026-11-14)
 - First version: sound boost and cast bar while fishing, restored when you stop. `/fishfocus` toggles it.
