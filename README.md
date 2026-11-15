@@ -67,6 +67,8 @@ No commands needed for most of it. It works through tooltips and one minimap but
 - Green **Upgrade for** means it's an item level upgrade for a friend who can use it (armor type, weapon skill, main stat and level are checked).
 - Gold **Guild can make** means a friend knows the recipe. Each crafter opens their profession window once to share it.
 
+![Alt+click an item to ask the guild for it](images/needs-chat.png) ![What it looks like on the tooltip](images/needs-tooltip.png)
+
 **Minimap button**
 - Left-click: tick the dungeons you want to run. Friends in level range get a heads-up. A tick turns off by itself when you click it again, leave that dungeon after killing 3+ bosses, out-level it, or after 48 hours.
 - Right-click: the guild window.
