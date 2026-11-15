@@ -19,7 +19,8 @@ versions = get('/game/versions')
 want = os.environ.get('CF_GAME_VERSION', '').strip()
 pick = [v for v in versions if want and v.get('name') == want]
 if not pick:
-    pick = [v for v in versions if 'forever' in str(v.get('name', '')).lower() or str(v.get('name', '')).startswith('1.16')]
+    # WoW Forever's interface is 16001, which CurseForge lists as game version 1.60.x
+    pick = [v for v in versions if 'forever' in str(v.get('name', '')).lower() or str(v.get('name', '')).startswith('1.60')]
 if not pick:
     print('Could not find a WoW Forever game version on CurseForge. Versions that look recent:')
     for v in sorted(versions, key=lambda v: v.get('id', 0))[-25:]: print(' ', v.get('id'), v.get('name'))

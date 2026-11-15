@@ -2,6 +2,10 @@
 
 ## Guild Board
 
+### 1.3.1 (2026-11-15)
+- Officer kill switch now records who flipped a feature and keeps a history (who, what, when), shown in `/gb bug`. Everyone also sees a chat line when a feature is switched back on.
+- First version published to CurseForge.
+
 ### 1.3.0 (2026-11-15)
 Big one, built for a guild of friends. Everything stays in game.
 - **Needs:** Alt+click any item to say you need it. Friends see it in blue on the tooltip; it counts down as items arrive.
@@ -15,7 +19,7 @@ Big one, built for a guild of friends. Everything stays in game.
 - **Version check:** tells you once when a guildmate has a newer version.
 - **Self-heal:** every feature is error-guarded; a feature that keeps erroring pauses itself until /reload; saved data is checked and repaired on login and old data pruned; unknown messages from newer versions are ignored.
 - **Bug reports:** `/gb bug` makes a report to paste. New errors are also shared quietly with the guild so the maintainer can fix them.
-- **Officer kill switch:** `/gb disable <feature>` turns a broken feature off for the whole guild until a fix ships. Everyone sees who flipped it, and the history (who, what, when) is kept and shows in `/gb bug`.
+- **Officer kill switch:** `/gb disable <feature>` turns a broken feature off for the whole guild until a fix ships. 
 - Known limits: Forever closes the combat log to addons, so the death log may show "something" as the killer. Scarlet Monastery and Dire Maul wings share an instance name, so finishing one wing clears all your flags for that dungeon.
 
 ### 1.2.1 (2026-11-14)
