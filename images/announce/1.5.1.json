@@ -1,0 +1,15 @@
+{
+ "from": "Slixx",
+ "replace": [
+  "1571702132778733673"
+ ],
+ "embeds": [
+  {
+   "title": "🗺️  Guild Board 1.5.1 is out",
+   "link": true,
+   "description": "Big one. The **To-Do List** is your own checklist with an arrow to the next stop, **Party & Upkeep** shows what your group has in common, and you can **share or ask for quests** with one click. Zone into a dungeon and it tells you who needs to repair before the first pull.\n\nGrabbed 1.5.0 earlier tonight? Get this one. Same thing with clearer names and a proper Skip button.\n\n**[⬇️  Download 1.5.1](https://github.com/KrisHendo09/guild-board/releases/latest)**  then fully restart WoW",
+   "image": "announce/patch_notes_1_5_1.png"
+  }
+ ],
+ "footer": "Something busted? Type /gb bug in game  ·  For the Horde"
+}

@@ -1,0 +1,48 @@
+{
+ "from": "Slixx",
+ "embeds": [
+  {
+   "title": "👀  What 1.5.1 looks like",
+   "link": true,
+   "description": "**The button.** Left-click opens your To-Do List. Right-click opens the menu. Hover it and it tells you what each click does.\n*Screenshots are from 1.5.0. Game Plan is now called **To-Do List** and Tracker is now **Party & Upkeep**.*",
+   "image": "150-minimap-menu.png"
+  },
+  {
+   "title": "The four windows",
+   "gallery": "https://github.com/KrisHendo09/guild-board#guild-board-what-it-does",
+   "images": [
+    "150-game-plan.png",
+    "150-party-tab.png",
+    "150-share-tab.png",
+    "150-dungeon-picker.png"
+   ],
+   "fields": [
+    {
+     "name": "1️⃣  To-Do List",
+     "value": "Your own checklist. Tick steps off, reorder with the arrows, x to remove. The gold arrow points at your next stop and shows how far it is."
+    },
+    {
+     "name": "2️⃣  Party tab",
+     "value": "Quests you and your group both have, in order. **+ To-Do** drops one onto your list. **Skip** takes one off."
+    },
+    {
+     "name": "3️⃣  Share tab",
+     "value": "Every quest your party has that you don't. Hit **Ask** and it gets shared to you. No typing, nothing in chat."
+    },
+    {
+     "name": "4️⃣  Dungeons",
+     "value": "Right-click, then Dungeons. Tick the ones you want to run and guildies in range get a heads-up."
+    }
+   ]
+  },
+  {
+   "title": "🤝  And it tells you who's nearby",
+   "description": "Walk into a zone where a guildie is questing and you get one chat line: who's there and how many quests you share. Then open the **Party** or **Share** tab and go.",
+   "image": "150-zone-headsup.png"
+  }
+ ],
+ "footer": "Party and Share only see people who also run Guild Board  ·  For the Horde",
+ "replace": [
+  "1571704508122271750"
+ ]
+}
