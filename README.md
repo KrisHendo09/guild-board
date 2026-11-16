@@ -108,6 +108,10 @@ No commands needed for most of it. It works through tooltips and one minimap but
 
 **Also**
 - A popup when a friend levels up, and a chat line when a friend dies.
+- A heads-up when a friend is questing in your zone, with how many quests you share.
+
+![Zone heads-up in chat](images/150-zone-headsup.png)
+
 - When you zone into a dungeon, a quick check of empty gear slots in your group.
 - If a friend has a newer version, it tells you once so you know to update.
 

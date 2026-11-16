@@ -34,6 +34,11 @@
      "value": "Right-click, then Dungeons. Tick the ones you want to run and guildies in range get a heads-up."
     }
    ]
+  },
+  {
+   "title": "🤝  And it tells you who's nearby",
+   "description": "Walk into a zone where a guildie is questing and you get one chat line: who's there and how many quests you share. Then open the **Party** or **Share** tab and go.",
+   "image": "150-zone-headsup.png"
   }
  ],
  "footer": "Party and Share only see people who also run Guild Board  ·  For the Horde"
