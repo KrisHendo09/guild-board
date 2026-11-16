@@ -2,6 +2,15 @@
 
 ## Guild Board
 
+### 1.5.1 (2026-11-15)
+Same-day cleanup from the first hour of 1.5.0.
+- **Renamed for clarity:** Game Plan is now **To-Do List** and Tracker is now **Party & Upkeep**. Same windows, same buttons, clearer names. `/todo` opens the list; `/plan` still works.
+- **Skip is now a button.** The checkbox on Party quests looked like "track this". It is now a Skip button, and the "skipped" line at the bottom opens the list so you can bring any one of them back.
+- Skips clear themselves when you turn the quest in or drop it.
+- The + Plan button is now **+ To-Do**, and shows **On list** once added.
+- The Party & Upkeep window is a little wider so quest names and zones are not cut off.
+- The empty To-Do List now tells you exactly where to click to add something.
+
 ### 1.5.0 (2026-11-15)
 - **Game Plan:** left-click the minimap button for your own checklist with an arrow to the next stop. Add things from the Tracker with + Plan, reorder with the up and down buttons, tick or remove steps. Quests check themselves off when turned in. Quest locations use Questie when it is installed. `/plan paste` takes a pasted list of steps; start a line with `[both]` to share it with your party.
 - **Tracker:** one window for upkeep and group play (right-click menu or `/gb track`), with Personal, Party, Share and Dungeon tabs.

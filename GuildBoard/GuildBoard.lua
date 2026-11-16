@@ -290,7 +290,7 @@ local function show(text)
     for _, k in ipairs({ "wantsText", "needsText", "socialText" }) do
       if ns[k] then local ok2, t = pcall(ns[k]); if ok2 and t then parts[#parts + 1] = t end end
     end
-    parts[#parts + 1] = "\n/gb bug what happened  = bug report     Minimap button: left-click Game Plan, right-click menu (tracker, dungeons)"
+    parts[#parts + 1] = "\n/gb bug what happened  = bug report     Minimap button: left-click To-Do List, right-click menu (Party & Upkeep, dungeons)"
     text = table.concat(parts, "\n")
   end
   frame.edit:SetText(text)

@@ -376,13 +376,13 @@ local function toggleMenu(anchor)
       menu:SetBackdropColor(0, 0, 0, 0.92)
     end
     local items = {
-      { "Tracker", function() if ns.toggleTracker then ns.toggleTracker() end end },
+      { "Party & Upkeep", function() if ns.toggleTracker then ns.toggleTracker() end end },
       { "Dungeons", function() togglePicker(anchor) end },
       { "Sync guild", function() if ns.syncGuild then ns.syncGuild() end end },
       { "Guild window", function() SlashCmdList["GUILDBOARD"]("") end },
       { "Character Card", function() if ns.paste then ns.paste() end end },
     }
-    table.insert(items, 1, { "Game Plan", function() if ns.togglePlan then ns.togglePlan() end end })
+    table.insert(items, 1, { "To-Do List", function() if ns.togglePlan then ns.togglePlan() end end })
     menu:SetHeight(16 + #items * 26)
     for i, it in ipairs(items) do
       local b = CreateFrame("Button", nil, menu, "UIPanelButtonTemplate")
@@ -427,8 +427,8 @@ local function makeMinimapButton()
   end)
   b:SetScript("OnEnter", function()
     GameTooltip:SetOwner(b, "ANCHOR_LEFT"); GameTooltip:SetText("Guild Board")
-    GameTooltip:AddLine("Left-click: Game Plan (your checklist and arrow)", 1, 1, 1)
-    GameTooltip:AddLine("Right-click: menu (tracker, dungeons, guild window, Character Card)", 1, 1, 1)
+    GameTooltip:AddLine("Left-click: To-Do List (your checklist, with an arrow to the next stop)", 1, 1, 1)
+    GameTooltip:AddLine("Right-click: menu (Party & Upkeep, dungeons, guild window, Character Card)", 1, 1, 1)
     GameTooltip:AddLine("Shift+click: Character Card (copy your character to paste)", 1, 1, 1)
     GameTooltip:AddLine("Alt+click any item: I need this", 1, 1, 1)
     GameTooltip:Show()

@@ -9,7 +9,7 @@
 --   Share:    every quest you can share with someone in the group (Share button) and every quest they have that
 --             you could take (Ask button: their Guild Board shares it, you get the normal accept popup).
 -- "+ Plan" on a line adds it to your Game Plan (Plan.lua): the small checklist with the arrow.
--- The Party quest list shows 5, More shows up to 20. Tick a quest's box to skip it; Unskip brings them back.
+-- The Party quest list shows 5, More shows up to 20. Skip takes a quest off the list; the "skipped" line brings any of them back.
 -- Everything is worked out on your own PC. Items clear themselves when they're done; nothing to tick off.
 -- The gear button picks what each tab tracks (saved per character). Hides in combat. Only opens when you ask:
 -- minimap right-click menu or /gb track. X or Esc closes it.
@@ -27,10 +27,10 @@ local LABELS = {
   { "Personal" },
   { "repair", "Repair at 50% or a broken item" }, { "slots", "Empty gear slots" }, { "bags", "Bags under 4 free" },
   { "trainer", "Class trainer visits" }, { "profcap", "Profession rank caps" }, { "reagents", "Reagents (ankhs, shards, ammo)" },
-  { "turnins", "Quests ready to turn in" }, { "claude", "Game Plan steps" },
+  { "turnins", "Quests ready to turn in" }, { "claude", "To-Do steps" },
   { "Party" },
   { "pshare", "Quests to share" }, { "pquests", "Shared quests in order" }, { "pupkeep", "Party repair and bags" },
-  { "pgear", "Gear check" }, { "pdungeons", "Dungeons everyone wants" }, { "pclaude", "Shared plan from your partner" },
+  { "pgear", "Gear check" }, { "pdungeons", "Dungeons everyone wants" },
   { "Window" }, { "hideCombat", "Hide in combat" },
 }
 
@@ -166,7 +166,7 @@ local function personal(add)
       if mine and not done[i] then n = n + 1; if #shown < 3 then shown[#shown + 1] = t.text end end
     end
     if n > 0 then
-      add(GOLD .. "GAME PLAN|r" .. GRAY .. (n > 3 and ("  " .. n - 3 .. " more in /ct") or "") .. "|r", true)
+      add(GOLD .. "TO-DO LIST|r" .. GRAY .. (n > 3 and ("  " .. n - 3 .. " more in /ct") or "") .. "|r", true)
       for _, t in ipairs(shown) do add(t) end
     end
   end
@@ -227,12 +227,16 @@ local function party(add, shareBtn)
       if a.n ~= b.n then return a.n > b.n end
       return a.q.title < b.q.title
     end)
-    -- skipped quests drop out (tick the box on a row, like RestedXP); 5 at a time, More shows up to 20
+    -- Skip button drops a quest off the list. "N skipped" opens the list so any one of them can be brought back.
     local c = db()
-    local skip = c.skip or {}
-    local kept, nskip = {}, 0
-    for _, r in ipairs(rows) do if skip[r.q.id] then nskip = nskip + 1 else kept[#kept + 1] = r end end
-    if #kept > 0 or nskip > 0 then
+    c.skip = c.skip or {}
+    local skip = c.skip
+    local inLog = {}
+    for _, q in ipairs(questLog()) do inLog[q.id] = true end
+    for id in pairs(skip) do if not inLog[id] then skip[id] = nil end end      -- turned in or dropped: forget the skip
+    local kept, skipped = {}, {}
+    for _, r in ipairs(rows) do if skip[r.q.id] then skipped[#skipped + 1] = r else kept[#kept + 1] = r end end
+    if #kept > 0 or #skipped > 0 then
       add(GOLD .. "TOGETHER, IN ORDER|r", true)
       local limit = c.moreQuests and 20 or 5
       for i, r in ipairs(kept) do
@@ -246,24 +250,17 @@ local function party(add, shareBtn)
       elseif c.moreQuests and #kept > 5 then
         add("", false, nil, { btn = "Less", fn = function() db().moreQuests = false end })
       end
-      if nskip > 0 then add(GRAY .. nskip .. " skipped|r", false, nil, { btn = "Unskip", fn = function() db().skip = {} end }) end
-    end
-  end
-
-  if opt("pclaude") then
-    local src = ctasks
-    if ClaudeTasks_List and ClaudeTasks_List.tasks and #ClaudeTasks_List.tasks > 0 then src = ClaudeTasks_List end   -- Kris's own copy
-    -- only tasks Claude addressed to you by name, or to "both"/"party". Untagged tasks are the sender's own, so a
-    -- random guildie who groups with Kris never sees his to-do list.
-    local me = (UnitName("player") or ""):lower()
-    local list = {}
-    for _, t in pairs(src.tasks or {}) do
-      local w = t and t.who and t.who:lower() or ""
-      if w == "both" or w == "party" or (w ~= "" and src ~= ClaudeTasks_List and me:find(w, 1, true)) then list[#list + 1] = t.text end
-    end
-    if #list > 0 then
-      local from = src == ClaudeTasks_List and "YOUR SHARED PLAN" or ("PLAN FROM " .. (ns.display(src.from or "?")):upper())
-      add(GOLD .. from .. "|r", true); for _, t in ipairs(list) do add(t) end
+      if #skipped > 0 then
+        add(GRAY .. #skipped .. " skipped|r", false, nil, c.showSkipped and { btn = "Hide", fn = function() db().showSkipped = false end }
+          or { btn = "Show", fn = function() db().showSkipped = true end })
+        if c.showSkipped then
+          for _, r in ipairs(skipped) do
+            local id = r.q.id
+            add(GRAY .. "    " .. r.q.title .. "  " .. r.q.zone .. "|r", false, nil, { btn = "Bring back", fn = function() db().skip[id] = nil end })
+          end
+          if #skipped > 1 then add("", false, nil, { btn = "All back", fn = function() db().skip = {}; db().showSkipped = false end }) end
+        end
+      end
     end
   end
 
@@ -450,7 +447,7 @@ end
 
 -- ===== window =====
 local frame, rows, tabs, settings = nil, {}, {}, nil
-local ROWH, MAXROWS, WIDTH = 18, 34, 330
+local ROWH, MAXROWS, WIDTH = 18, 34, 370
 
 local function makeSettings()
   settings = CreateFrame("Frame", "GuildBoardTrackerSettings", frame, BackdropTemplateMixin and "BackdropTemplate" or nil)
@@ -519,9 +516,13 @@ local function build()
     local r = { y = y }
     r.btn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate"); r.btn:SetSize(64, 16); r.btn:SetPoint("TOPRIGHT", -8, y + 1)
     r.btn:SetText("Share next"); r.btn:Hide()
-    r.cb = CreateFrame("CheckButton", nil, frame, "UICheckButtonTemplate"); r.cb:SetSize(18, 18); r.cb:SetPoint("TOPLEFT", 8, y + 1); r.cb:Hide()
-    r.cb:SetScript("OnEnter", function(b) GameTooltip:SetOwner(b, "ANCHOR_LEFT"); GameTooltip:SetText("Skip this quest"); GameTooltip:Show() end)
-    r.cb:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    r.skip = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate"); r.skip:SetSize(40, 16); r.skip:SetPoint("RIGHT", r.btn, "LEFT", -3, 0)
+    r.skip:SetText("Skip"); r.skip:Hide()
+    r.skip:SetScript("OnEnter", function(b)
+      GameTooltip:SetOwner(b, "ANCHOR_LEFT"); GameTooltip:SetText("Skip this quest")
+      GameTooltip:AddLine("Takes it off this list. Bring it back from the \"skipped\" line at the bottom.", 1, 1, 1, true); GameTooltip:Show()
+    end)
+    r.skip:SetScript("OnLeave", function() GameTooltip:Hide() end)
     r.text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     r.text:SetPoint("TOPLEFT", 12, y - 2); r.text:SetJustifyH("LEFT"); r.text:SetWordWrap(false)
     rows[i] = r
@@ -548,14 +549,12 @@ local function render()
       local x = o.x
       local skipId = x and x.skipId
       local hasBtn = o.share or (x and (x.btn or x.plan))
-      r.text:ClearAllPoints(); r.text:SetPoint("TOPLEFT", skipId and 28 or 12, r.y - 2)
-      r.text:SetWidth(WIDTH - (hasBtn and 96 or 24) - (skipId and 16 or 0))
+      r.text:SetWidth(WIDTH - (hasBtn and 96 or 24) - (skipId and 44 or 0))
       r.text:SetText(o.t or "")
       if skipId then
-        r.cb:SetChecked(false)
-        r.cb:SetScript("OnClick", function() local c2 = db(); c2.skip = c2.skip or {}; c2.skip[skipId] = true; ns.trackerRefresh() end)
-        r.cb:Show()
-      else r.cb:Hide() end
+        r.skip:SetScript("OnClick", function() local c2 = db(); c2.skip = c2.skip or {}; c2.skip[skipId] = true; ns.trackerRefresh() end)
+        r.skip:Show()
+      else r.skip:Hide() end
       if o.share then
         r.btn:SetText("Share next")
         r.btn:SetScript("OnClick", function() ns.party.share(o.share); C_Timer.After(1, function() ns.partyRefresh(true) end) end)
@@ -565,11 +564,11 @@ local function render()
         r.btn:SetScript("OnClick", function() pcall(x.fn); ns.trackerRefresh() end)
         r.btn:Show()
       elseif x and x.plan and ns.planToggleItem then
-        r.btn:SetText(ns.planHas(x.plan.key) and "In plan" or "+ Plan")
+        r.btn:SetText(ns.planHas(x.plan.key) and "On list" or "+ To-Do")
         r.btn:SetScript("OnClick", function() pcall(ns.planToggleItem, x.plan); ns.trackerRefresh() end)
         r.btn:Show()
       else r.btn:Hide() end
-    else r.text:SetText(""); r.btn:Hide(); r.cb:Hide() end
+    else r.text:SetText(""); r.btn:Hide(); r.skip:Hide() end
   end
   frame:SetHeight(38 + n * ROWH)
 end

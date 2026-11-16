@@ -27,7 +27,7 @@ local function db()
   if c.arrowOn == nil then c.arrowOn = true end
   return c
 end
-local function say(msg) print("|cff33ff99Game Plan|r " .. msg) end
+local function say(msg) print("|cff33ff99To-Do List|r " .. msg) end
 local function clean(s) return (tostring(s or ""):gsub("[%^\n\r]", " ")) end
 local function plain(s) return (tostring(s or ""):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")) end
 
@@ -394,7 +394,7 @@ local function showPaste()
     f:EnableMouse(true); f:SetMovable(true); f:RegisterForDrag("LeftButton")
     f:SetScript("OnDragStart", f.StartMoving); f:SetScript("OnDragStop", f.StopMovingOrSizing)
     local title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    title:SetPoint("TOP", 0, -10); title:SetText("Game Plan: paste steps, one per line (Ctrl+V)")
+    title:SetPoint("TOP", 0, -10); title:SetText("To-Do List: paste steps, one per line (Ctrl+V)")
     local hint = f:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
     hint:SetPoint("TOP", 0, -26); hint:SetText("Buy thread @ Hillsbrad Foothills 62.2 19.0 | note      Start a line with [both] to share it")
     local close = CreateFrame("Button", nil, f, "UIPanelCloseButton"); close:SetPoint("TOPRIGHT", 2, 2)
@@ -553,7 +553,7 @@ refresh = function()
   local vis = visible()
   local open = 0
   for _, v in ipairs(vis) do if not v.it.done then open = open + 1 end end
-  frame.title:SetText(GOLD .. "Game Plan|r" .. GRAY .. "  " .. open .. " to do|r")
+  frame.title:SetText(GOLD .. "To-Do List|r" .. GRAY .. "  " .. open .. " left|r")
   local n = math.min(#vis, MAXROWS)
   for i, r in ipairs(rows) do
     local v = vis[i]
@@ -595,7 +595,7 @@ refresh = function()
   local extra = 0
   if #vis == 0 then
     frame.more:SetPoint("TOPLEFT", 12, -30)
-    frame.more:SetText("Empty. Open the Tracker and press + Plan on a line,\nor press Paste to drop in a list of steps.")
+    frame.more:SetText("Empty. Right-click the minimap button, open Party & Upkeep\nand press + To-Do on a line. Or press Paste.")
     extra = 30
   elseif #vis > MAXROWS then
     frame.more:SetPoint("TOPLEFT", 26, -28 - n * ROWH - 2)
@@ -676,6 +676,7 @@ end)
 
 SLASH_GBPLAN1 = "/plan"
 SLASH_GBPLAN2 = "/gameplan"
+SLASH_GBPLAN3 = "/todo"
 SlashCmdList["GBPLAN"] = function(msg)
   msg = (msg or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
   if msg == "paste" then ns.planPaste()
