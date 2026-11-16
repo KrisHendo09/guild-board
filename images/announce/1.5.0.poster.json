@@ -1,0 +1,56 @@
+{
+ "out": "patch_notes_1_5_0.png",
+ "title": "Guild Board 1.5.0",
+ "sub": "PATCH NOTES  \u00b7  GAME PLAN, QUEST SHARING AND A DUNGEON TAB",
+ "rows": [
+  {
+   "label": "NEW",
+   "color": [
+    232,
+    185,
+    100
+   ],
+   "items": [
+    [
+     "Game Plan",
+     "Left-click the minimap button. Your own checklist with an arrow to the next stop. Quests tick themselves off."
+    ],
+    [
+     "Tracker",
+     "Right-click, then Tracker. Repairs, bags, turn-ins and group quests in one window."
+    ],
+    [
+     "Share and Ask",
+     "Share any quest a party member can take. Ask for one they have and it gets shared for them."
+    ],
+    [
+     "Dungeon tab",
+     "Opens by itself when you zone in. Who needs to repair, where everyone is, bosses down."
+    ]
+   ]
+  },
+  {
+   "label": "CHANGED",
+   "color": [
+    90,
+    200,
+    110
+   ],
+   "items": [
+    [
+     "Minimap button",
+     "Left-click is now Game Plan. Dungeons moved into the right-click menu."
+    ],
+    [
+     "Group quests",
+     "Party tab shows 5 at a time. Hit More for 20, tick a box to skip one."
+    ],
+    [
+     "Sync guild",
+     "New menu button. Asks everyone online to resend their info. No typing."
+    ]
+   ]
+  }
+ ],
+ "footer": "Update from the pin in #addons  \u00b7  Fully restart WoW after  \u00b7  /gb bug to report issues"
+}

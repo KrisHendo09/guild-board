@@ -1,0 +1,12 @@
+{
+ "from": "Slixx",
+ "embeds": [
+  {
+   "title": "🗺️  Guild Board 1.5.0 is out",
+   "link": true,
+   "description": "Big one. **Game Plan** gives you your own checklist with an arrow to the next stop, the **Tracker** shows what your group has in common, and you can **share or ask for quests** with one click. Zone into a dungeon and it tells you who needs to repair before the first pull.\n\n**[⬇️  Download 1.5.0](https://github.com/KrisHendo09/guild-board/releases/latest)**  then fully restart WoW",
+   "image": "announce/patch_notes_1_5_0.png"
+  }
+ ],
+ "footer": "Something busted? Type /gb bug in game  ·  For the Horde"
+}
