@@ -1,0 +1,40 @@
+{
+ "from": "Slixx",
+ "embeds": [
+  {
+   "title": "👀  What 1.5.0 looks like",
+   "link": true,
+   "description": "**The button.** Left-click opens Game Plan. Right-click opens this menu. Hover it and it tells you what each click does.",
+   "image": "150-minimap-menu.png"
+  },
+  {
+   "title": "The four windows",
+   "gallery": "https://github.com/KrisHendo09/guild-board#guild-board-what-it-does",
+   "images": [
+    "150-game-plan.png",
+    "150-party-tab.png",
+    "150-share-tab.png",
+    "150-dungeon-picker.png"
+   ],
+   "fields": [
+    {
+     "name": "1️⃣  Game Plan",
+     "value": "Your own checklist. Tick steps off, reorder with the arrows, x to remove. The gold arrow points at your next stop and shows how far it is."
+    },
+    {
+     "name": "2️⃣  Party tab",
+     "value": "Quests you and your group both have, in order. **+ Plan** drops one into your Game Plan. Tick the box to skip it."
+    },
+    {
+     "name": "3️⃣  Share tab",
+     "value": "Every quest your party has that you don't. Hit **Ask** and it gets shared to you. No typing, nothing in chat."
+    },
+    {
+     "name": "4️⃣  Dungeons",
+     "value": "Right-click, then Dungeons. Tick the ones you want to run and guildies in range get a heads-up."
+    }
+   ]
+  }
+ ],
+ "footer": "Party and Share only see people who also run Guild Board  ·  For the Horde"
+}

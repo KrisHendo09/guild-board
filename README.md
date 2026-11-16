@@ -74,6 +74,9 @@ No commands needed for most of it. It works through tooltips and one minimap but
 - Left-click: **Game Plan**, your own checklist with an arrow to the next stop.
 - Right-click: a menu with Game Plan, Tracker, Dungeons, Sync guild, Guild window and Character Card.
 - Shift+click: Character Card.
+
+![Minimap button and its right-click menu](images/150-minimap-menu.png)
+
 - Dungeons (in the menu): tick the dungeons you want to run. Friends in level range get a heads-up. A tick turns off by itself when you click it again, leave that dungeon after killing 3+ bosses, out-level it, or after 48 hours.
 
 **Game Plan (left-click, or `/plan`)**
@@ -81,6 +84,9 @@ No commands needed for most of it. It works through tooltips and one minimap but
 - To add things, open the Tracker and press **+ Plan** on a quest, turn-in or upkeep line.
 - The arrow points at your first open step that has a location. Click a step to point at that one instead. Quest locations come from Questie when you have it installed.
 - Quests check themselves off when you turn them in.
+
+![Game Plan checklist with the arrow](images/150-game-plan.png)
+
 - `/plan paste` opens a box where you can paste a list of steps, one per line, like `Buy thread @ Hillsbrad Foothills 62.2 19.0 | note`. Start a line with `[both]` to share that step with your party.
 
 **Tracker (right-click menu, or `/gb track`)**
@@ -90,7 +96,9 @@ No commands needed for most of it. It works through tooltips and one minimap but
 - **Dungeon:** opens by itself when you zone into a dungeon. Who needs to repair, where everyone is (area name, in range or not), quests for that dungeon and who has them, bosses down, and a one-click run report.
 - The party parts only see people who also run Guild Board.
 
-![Dungeon picker from the minimap button](images/dungeon-picker.png)
+![Party tab: quests you have in common](images/150-party-tab.png) ![Share tab: ask for quests your party has](images/150-share-tab.png)
+
+![Dungeon picker from the menu](images/150-dungeon-picker.png)
 
 **At the mailbox:** a **Send needs** button fills in a mail to whoever needs something you're carrying. You still click Send.
 
