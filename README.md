@@ -71,8 +71,24 @@ No commands needed for most of it. It works through tooltips and one minimap but
 ![Alt+click an item to ask the guild for it](images/needs-chat.png) ![What it looks like on the tooltip](images/needs-tooltip.png)
 
 **Minimap button**
-- Left-click: tick the dungeons you want to run. Friends in level range get a heads-up. A tick turns off by itself when you click it again, leave that dungeon after killing 3+ bosses, out-level it, or after 48 hours.
-- Right-click: the guild window.
+- Left-click: **Game Plan**, your own checklist with an arrow to the next stop.
+- Right-click: a menu with Game Plan, Tracker, Dungeons, Sync guild, Guild window and Character Card.
+- Shift+click: Character Card.
+- Dungeons (in the menu): tick the dungeons you want to run. Friends in level range get a heads-up. A tick turns off by itself when you click it again, leave that dungeon after killing 3+ bosses, out-level it, or after 48 hours.
+
+**Game Plan (left-click, or `/plan`)**
+- A small checklist you can drag anywhere. Tick a step when it's done, use the up and down buttons to reorder, x to remove.
+- To add things, open the Tracker and press **+ Plan** on a quest, turn-in or upkeep line.
+- The arrow points at your first open step that has a location. Click a step to point at that one instead. Quest locations come from Questie when you have it installed.
+- Quests check themselves off when you turn them in.
+- `/plan paste` opens a box where you can paste a list of steps, one per line, like `Buy thread @ Hillsbrad Foothills 62.2 19.0 | note`. Start a line with `[both]` to share that step with your party.
+
+**Tracker (right-click menu, or `/gb track`)**
+- **Personal:** repair, empty gear slots, full bags, trainer visits, profession caps, quests ready to turn in.
+- **Party:** who needs to repair or clear bags, then the quests your group has in common. Shows 5, **More** shows up to 20. Tick a quest's box to skip it.
+- **Share:** a **Share** button for every quest you can give someone, and an **Ask** button for every quest they have that you don't. Ask makes their Guild Board share it, and you get the normal accept popup.
+- **Dungeon:** opens by itself when you zone into a dungeon. Who needs to repair, where everyone is (area name, in range or not), quests for that dungeon and who has them, bosses down, and a one-click run report.
+- The party parts only see people who also run Guild Board.
 
 ![Dungeon picker from the minimap button](images/dungeon-picker.png)
 

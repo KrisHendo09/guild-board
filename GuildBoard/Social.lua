@@ -165,6 +165,8 @@ local function myQuests()
   return out
 end
 
+ns.myQuests = myQuests
+
 local lastQuests
 local function broadcastQuests(force)
   if ns.featureOff("quests") then return end
@@ -405,6 +407,11 @@ local function partyCheck(announce)
   if #nodata > 0 then text = text .. GRAY .. " (no addon data for " .. table.concat(nodata, ", ") .. ")|r" end
   if announce then print(GREEN .. "Guild Board|r party check: " .. text) end
   return text
+end
+
+ns.partyGearText = function()
+  local t = partyCheck(false)
+  return t and ("|cffffd100GEAR CHECK|r\n" .. t) or nil
 end
 
 -- ===== window sections =====

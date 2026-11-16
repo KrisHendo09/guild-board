@@ -3,7 +3,7 @@
 --         (checks armor type, weapon skills, main stat and required level).
 --   Mats: yellow "Could use" lines on crafting mats that match the skill bracket a guildie is leveling.
 --         Blue lines elsewhere are things someone actually asked for (Alt+click).
---   Dungeons: click the minimap button to flag dungeons you want to run. Right-click it for the Guild Board window.
+--   Dungeons: right-click the minimap button > Dungeons to flag the ones you want to run. Left-click opens Game Plan.
 --         A flag turns off when you click it again, leave that dungeon after killing 3+ bosses, out-level it, or after 48 hours.
 
 local _, ns = ...
@@ -231,6 +231,7 @@ local DUNGEONS = {
 }
 local BYKEY = {}
 for _, d in ipairs(DUNGEONS) do BYKEY[d[1]] = d end
+ns.dungeonByKey = BYKEY
 
 local function myWants()
   db().myWants = db().myWants or {}
@@ -281,7 +282,7 @@ local function toggleWant(k)
 end
 
 ns.wantsText = function()
-  local L = { "", "DUNGEONS (click the minimap button to flag one)" }
+  local L = { "", "DUNGEONS (right-click the minimap button > Dungeons to flag one)" }
   local any = false
   local now = time()
   local all = {}
@@ -363,6 +364,37 @@ local function togglePicker(anchor)
   picker:Show(); ns.refreshPicker()
 end
 
+-- right-click menu on the minimap button
+local menu
+local function toggleMenu(anchor)
+  if not menu then
+    menu = CreateFrame("Frame", "GuildBoardMenu", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
+    menu:SetSize(150, 118); menu:SetFrameStrata("DIALOG")
+    if menu.SetBackdrop then
+      menu:SetBackdrop({ bgFile = "Interface\\ChatFrame\\ChatFrameBackground", edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 12,
+        insets = { left = 3, right = 3, top = 3, bottom = 3 } })
+      menu:SetBackdropColor(0, 0, 0, 0.92)
+    end
+    local items = {
+      { "Tracker", function() if ns.toggleTracker then ns.toggleTracker() end end },
+      { "Dungeons", function() togglePicker(anchor) end },
+      { "Sync guild", function() if ns.syncGuild then ns.syncGuild() end end },
+      { "Guild window", function() SlashCmdList["GUILDBOARD"]("") end },
+      { "Character Card", function() if ns.paste then ns.paste() end end },
+    }
+    table.insert(items, 1, { "Game Plan", function() if ns.togglePlan then ns.togglePlan() end end })
+    menu:SetHeight(16 + #items * 26)
+    for i, it in ipairs(items) do
+      local b = CreateFrame("Button", nil, menu, "UIPanelButtonTemplate")
+      b:SetSize(134, 22); b:SetPoint("TOP", 0, -8 - (i - 1) * 26); b:SetText(it[1])
+      b:SetScript("OnClick", function() menu:Hide(); local ok, err = pcall(it[2]); if not ok then print("Guild Board: " .. tostring(err)) end end)
+    end
+    tinsert(UISpecialFrames, "GuildBoardMenu")
+  end
+  if menu:IsShown() then menu:Hide(); return end
+  menu:ClearAllPoints(); menu:SetPoint("TOPRIGHT", anchor, "BOTTOMLEFT", 0, 0); menu:Show()
+end
+
 local function makeMinimapButton()
   if not Minimap then return end
   local b = CreateFrame("Button", "GuildBoardMinimapButton", Minimap)
@@ -390,12 +422,13 @@ local function makeMinimapButton()
   b:SetScript("OnDragStop", function() b:SetScript("OnUpdate", nil) end)
   b:SetScript("OnClick", function(_, btn)
     if IsShiftKeyDown() and ns.paste then ns.paste()
-    elseif btn == "RightButton" then SlashCmdList["GUILDBOARD"]("") else togglePicker(b) end
+    elseif btn == "RightButton" then toggleMenu(b)
+    elseif ns.togglePlan then ns.togglePlan() else toggleMenu(b) end
   end)
   b:SetScript("OnEnter", function()
     GameTooltip:SetOwner(b, "ANCHOR_LEFT"); GameTooltip:SetText("Guild Board")
-    GameTooltip:AddLine("Left-click: pick dungeons you want to run", 1, 1, 1)
-    GameTooltip:AddLine("Right-click: guild window", 1, 1, 1)
+    GameTooltip:AddLine("Left-click: Game Plan (your checklist and arrow)", 1, 1, 1)
+    GameTooltip:AddLine("Right-click: menu (tracker, dungeons, guild window, Character Card)", 1, 1, 1)
     GameTooltip:AddLine("Shift+click: Character Card (copy your character to paste)", 1, 1, 1)
     GameTooltip:AddLine("Alt+click any item: I need this", 1, 1, 1)
     GameTooltip:Show()
