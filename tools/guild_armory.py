@@ -100,6 +100,17 @@ def week_gains(rows, now):
     json.dump(hist, open(HISTORY, 'w'))
     return gains
 
+# Level floor for the whole board: people under it are hidden everywhere (roster, crafting, Wall of Heroes).
+# It rises on its own: 20 now, 30 from Dec 15 2026, 40 from Jan 15 2027.
+LEVEL_FLOOR = [('2027-01-15', 40), ('2026-12-15', 30), ('2000-01-01', 20)]
+
+def level_floor(now_ts):
+    day = datetime.fromtimestamp(now_ts, timezone.utc).strftime('%Y-%m-%d')
+    for start, lvl in LEVEL_FLOOR:
+        if day >= start: return lvl
+    return 20
+
+
 def render(data, min_panels=0):
     from PIL import Image, ImageDraw, ImageFont
     GF = os.path.join(HERE, 'art', 'fonts') + os.sep      # Poppins (OFL) ships in the repo so GitHub draws the same thing
@@ -116,6 +127,8 @@ def render(data, min_panels=0):
     X0, X1, Y0, Y1 = 58, 1142, 214, 748        # inside the iron frame, below the banner and torches
     BG = '#111318'; TXT = '#F1E9DA'; MUTE = '#A79C8A'; GOLD = '#E8B964'
     rows = data['members']; now = data['at']
+    floor = level_floor(now)
+    rows = [r for r in rows if (r.get('level') or 0) >= floor]
     try:
         from zoneinfo import ZoneInfo
         stamp = datetime.fromtimestamp(now, ZoneInfo('America/Chicago')).strftime('%b %d, %I:%M %p CT').replace(' 0', ' ')
@@ -165,7 +178,7 @@ def render(data, min_panels=0):
     nrow = (len(profs) + cols - 1) // cols
     cw = (X1 - X0 - gap * (cols - 1)) / cols; ch = (Y1 - Y0 - gap * (nrow - 1)) / nrow
     im = canvas()
-    im, d = header(im, 'Who Can Make What', f"{data['guild']}  ·  {len(rows)} members  ·  top {TOP}, skill out of {MAXSKILL}")
+    im, d = header(im, 'Who Can Make What', f"{data['guild']}  ·  {len(rows)} members level {floor}+  ·  top {TOP}, skill out of {MAXSKILL}")
     for i, p in enumerate(profs):
         cx = int(X0 + (i % cols) * (cw + gap)); cy = int(Y0 + (i // cols) * (ch + gap)); cx2 = int(cx + cw); cy2 = int(cy + ch)
         im = panel(im, [cx, cy, cx2, cy2], outline=(232, 185, 100, 110))
@@ -192,7 +205,7 @@ def render(data, min_panels=0):
     for ci, chunk in enumerate(chunks):
         im = canvas()
         a = ci * PER + 1
-        im, d = header(im, 'Guild Roster', f"Members {a} to {a + max(len(chunk), 1) - 1} of {len(rows)}{away_note}")
+        im, d = header(im, 'Guild Roster', f"Level {floor}+  ·  {a} to {a + max(len(chunk), 1) - 1} of {len(rows)}{away_note}")
         y = Y0
         for label, x, anc in (('NAME', X['name'], 'lm'), ('LVL', X['lvl'], 'rm'), ('CLASS', X['cls'], 'lm'), ('ILVL', X['ilvl'], 'rm'),
                               ('DUNGEONS IN RANGE', X['dung'], 'lm'), ('THIS WEEK', X['week'], 'rm'), ('LAST SEEN', X['seen'], 'rm')):
@@ -252,7 +265,7 @@ def render(data, min_panels=0):
             elif v and latest and vkey(v) < vkey(latest): old.append((r, v))
             else: heroes.append((r, v or '?'))
         im = canvas()
-        im, d = header(im, 'Wall of Heroes', f"Guild Board addon  ·  latest is {latest or '?'}  ·  active in the last 7 days")
+        im, d = header(im, 'Wall of Heroes', f"Guild Board addon  ·  latest is {latest or '?'}  ·  level {floor}+, active in the last 7 days")
         cols = [('HEROES', 'on the latest version or newer', heroes, (90, 200, 110)),
                 ('OLD VERSION', 'time to update', old, (232, 170, 60)),
                 ('NO ADDON', 'grab it from #addons', none, (210, 70, 50))]
@@ -296,7 +309,7 @@ def render(data, min_panels=0):
     n = len(panels)
     while len(panels) < (min_panels - 1 if shame else min_panels):
         im = canvas()
-        im, d = header(im, 'Guild Roster', f"{len(rows)} active{away_note}")
+        im, d = header(im, 'Guild Roster', f"{len(rows)} active at level {floor}+{away_note}")
         text(d, (W // 2, (Y0 + Y1) // 2), "That's everyone active this week.", F(26, 'SemiBold'), MUTE, 'mm')
         panels.append((f'guild_roster_spare_{len(panels) - n + 1}.png', im))
     if shame: panels.append(shame)          # always the last Discord post
