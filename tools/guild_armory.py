@@ -372,5 +372,9 @@ if __name__ == '__main__':
     ids_env = os.environ.get('DISCORD_MESSAGE_IDS', '')
     want = 0 if ids_env == 'none' else len([x for x in ids_env.split(',') if x.strip()])
     paths = render(data, want)
+    # more panels than Discord posts (roster grew): the Wall of Heroes keeps the last post, extra roster pages wait
+    if want and len(paths) > want and paths[-1].endswith('guild_wall_of_heroes.png'):
+        print(f'NEW_PANEL_NEEDED {len(paths) - want} roster page(s) not shown: run with add_panels or add a post id')
+        paths = paths[:want - 1] + [paths[-1]]
     if '--dry' in sys.argv: print('DRY', [os.path.basename(p) for p in paths])
     else: send(paths)
