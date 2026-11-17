@@ -4,7 +4,7 @@ name: Announce
 on:
   workflow_dispatch:
     inputs:
-      file: {description: 'Announcement file(s) in images/announce, comma separated', default: 'forum_open.json,1.5.1.json,1.5.1.tour.json'}
+      file: {description: 'Announcement file(s) in images/announce, comma separated', default: '1.5.1.json'}
       ping: {description: 'Ping', type: choice, options: [none, everyone], default: none}
       cleanup: {description: 'Delete the old posts listed in the file first', type: boolean, default: false}
 concurrency: {group: announce, cancel-in-progress: false}
