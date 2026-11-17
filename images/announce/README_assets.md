@@ -1,0 +1,1 @@
+- bank_deposit_tooltip.png: in-game shot of the Deposit Items button tooltip on the bank bar (Kris, Nov 16 2026). Use it in any bank deposit announcement or patch notes.
