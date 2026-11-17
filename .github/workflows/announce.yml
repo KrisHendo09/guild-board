@@ -1,18 +1,19 @@
 name: Announce
-# Kris starts this by hand. Posts one announcement to #addons through the ANNOUNCE_WEBHOOK secret.
+# Kris starts this by hand. Posts into the Guild Board post in #addons-forum through the ANNOUNCE_WEBHOOK secret.
+# file can be a comma list, posted in order. A file with thread_name (forum_open.json) opens the forum post.
 on:
   workflow_dispatch:
     inputs:
-      file: {description: 'Announcement file in images/announce', default: '1.3.json'}
+      file: {description: 'Announcement file(s) in images/announce, comma separated', default: 'forum_open.json,1.5.1.json,1.5.1.tour.json'}
       ping: {description: 'Ping', type: choice, options: [none, everyone], default: none}
-      cleanup: {description: 'Delete the old posts listed in the file first', type: boolean, default: true}
+      cleanup: {description: 'Delete the old posts listed in the file first', type: boolean, default: false}
 concurrency: {group: announce, cancel-in-progress: false}
 jobs:
   post:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: python3 tools/announce.py "images/announce/${{ inputs.file }}"
+      - run: python3 tools/announce.py "${{ inputs.file }}"
         env:
           ANNOUNCE_WEBHOOK: ${{ secrets.ANNOUNCE_WEBHOOK }}
           PING: ${{ inputs.ping }}
