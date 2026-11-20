@@ -1,1 +1,14 @@
-{"note": "One entry per bug signature. No player names. See RUNBOOK.md.", "bugs": []}
+{
+ "note": "One entry per bug signature. No player names. See RUNBOOK.md.",
+ "bugs": [
+  {
+   "sig": "Interface/AddOns/GuildBoard/WeaponSwap.lua: attempt to call a nil value",
+   "ver": "1.5.1",
+   "feature": "swap",
+   "status": "dev-build",
+   "shipped": null,
+   "date": "2026-11-20",
+   "note": "WeaponSwap.lua is not in the repo (unreleased dev build file). Handed to the addon dev chat via the Drive request note."
+  }
+ ]
+}
