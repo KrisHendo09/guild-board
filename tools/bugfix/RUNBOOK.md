@@ -51,10 +51,11 @@ it shipped in and the date. No player names in it (the repo is public). Skip any
    Guild Board, https://www.curseforge.com/wow/addons/push-to-prod-guild-board) or download from GitHub, then
    fully restart WoW. No image, no em dashes, short.
 3. Update `tools/bugfix/ledger.json`. Commit as `KrisHendo09 <KrisHendo09@users.noreply.github.com>`, push `main`.
-4. `git tag vX.Y.Z && git push origin vX.Y.Z`. The Release workflow makes the GitHub release, attaches the zips
-   and uploads to CurseForge. Wait for it and check it: the run succeeded, the release has GuildBoard.zip, and the
-   log says "Uploaded to CurseForge". If it failed, stop here and tell Kris. Do not announce a release that is
-   not downloadable.
+4. Start the Release workflow (this run cannot push tags, the workflow makes the tag and the release itself):
+   `gh api -X POST repos/KrisHendo09/guild-board/actions/workflows/release.yml/dispatches -f ref=main -f 'inputs[version]=X.Y.Z'`.
+   It attaches the zips and uploads to CurseForge. Wait for it and check it: the run succeeded, the release has
+   GuildBoard.zip, and the log says "Uploaded to CurseForge". If it failed, stop here and tell Kris. Do not
+   announce a release that is not downloadable.
 5. Announce: `gh api -X POST repos/KrisHendo09/guild-board/actions/workflows/announce.yml/dispatches -f ref=main
    -f 'inputs[file]=X.Y.Z.json' -f 'inputs[ping]=everyone' -F 'inputs[cleanup]=false'`. Check that run too.
    Kris approved the @everyone ping for bug fix releases on Nov 20, 2026. Never ping for anything else.
