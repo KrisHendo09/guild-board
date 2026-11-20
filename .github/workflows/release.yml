@@ -1,27 +1,56 @@
-# When a release is published on GitHub, this builds one zip per addon, attaches them to it,
-# and uploads Guild Board to CurseForge (if the CF_API_KEY secret and the toc project id are set).
+# Builds one zip per addon, attaches them to the GitHub release, and uploads Guild Board to CurseForge
+# (if the CF_API_KEY secret and the toc project id are set). Two ways in:
+#  1. A release is published by hand on GitHub (feature releases).
+#  2. A tag like v1.5.2 is pushed with no release yet (the bug fix schedule). The workflow then creates the
+#     release itself, with notes from that version's section of CHANGELOG.md.
+# If a tag push arrives for a release that already exists, the run stops so nothing is uploaded twice.
 name: Release
 on:
   release:
     types: [published]
+  push:
+    tags: ['v*']
 permissions:
   contents: write
+concurrency:
+  group: release-${{ github.event.release.tag_name || github.ref_name }}
+  cancel-in-progress: false
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
+      - name: Tag push, make the release if there is none
+        id: gate
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then echo "go=yes" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if gh release view "$TAG" >/dev/null 2>&1; then echo "Release $TAG already exists, the release run handles it"; echo "go=no" >> "$GITHUB_OUTPUT"; exit 0; fi
+          VER="${TAG#v}"
+          TOCVER=$(grep -m1 '^## Version:' GuildBoard/GuildBoard.toc | awk '{print $3}' | tr -d '\r')
+          if [ "$VER" != "$TOCVER" ]; then echo "Tag $TAG does not match the toc version $TOCVER"; exit 1; fi
+          python3 - "$VER" <<'PY'
+          import re, sys
+          ver = sys.argv[1]; log = open('CHANGELOG.md', encoding='utf-8').read()
+          m = re.search(r'### ' + re.escape(ver) + r'[^\n]*\n(.*?)(?=\n### |\n## |\Z)', log, re.S)
+          open('notes.md', 'w', encoding='utf-8').write((m.group(1).strip() if m else f'Guild Board {ver}') + '\n\nUpdate through the CurseForge app, or download GuildBoard.zip below and fully restart WoW.\n')
+          PY
+          gh release create "$TAG" --title "Guild Board $VER" --notes-file notes.md --verify-tag
+          echo "go=yes" >> "$GITHUB_OUTPUT"
       - name: Zip each addon
+        if: steps.gate.outputs.go == 'yes'
         run: |
           for toc in */*.toc; do
             dir=$(dirname "$toc")
             zip -r "$dir.zip" "$dir"
           done
       - name: Attach zips to the release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" *.zip --clobber
+        if: steps.gate.outputs.go == 'yes'
+        run: gh release upload "$TAG" *.zip --clobber
       - name: Upload Guild Board to CurseForge
+        if: steps.gate.outputs.go == 'yes'
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           CF_GAME_VERSION: ${{ vars.CF_GAME_VERSION }}

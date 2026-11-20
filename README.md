@@ -11,7 +11,7 @@ Small addons for World of Warcraft: Forever. Each folder is one addon.
 
 ## Install
 
-**Easiest: CurseForge.** Search for Guild Board in the CurseForge app with your WoW Forever install selected, click Install, and it keeps itself updated. (Link coming once CurseForge approves the project.)
+**Easiest: CurseForge.** Search for **Push To Prod: Guild Board** in the CurseForge app with your WoW Forever install selected, click Install, and it keeps itself updated. Page: https://www.curseforge.com/wow/addons/push-to-prod-guild-board (there is another addon just called Guild Board, that one is not ours.)
 
 **By hand:**
 
