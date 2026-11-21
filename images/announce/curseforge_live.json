@@ -1,0 +1,11 @@
+{
+ "from": "Slixx",
+ "embeds": [
+  {
+   "title": "🔨  Guild Board updates itself now",
+   "description": "Guild Board is live on CurseForge. Install it once from the app and every update lands on its own, bug fixes included. No more zips.\n\n**1.** Open the CurseForge app and pick your WoW Forever install\n**2.** Search **Push To Prod: Guild Board** (there is another addon just called Guild Board, that one is not ours)\n**3.** Hit Install, then fully restart WoW\n\nAlready have it from GitHub? Install it from the app anyway so it takes over the updates.\n\n**[Push To Prod: Guild Board on CurseForge](https://www.curseforge.com/wow/addons/push-to-prod-guild-board)**",
+   "image": "announce/curseforge_live.gif"
+  }
+ ],
+ "footer": "Something busted? Type /gb bug in game  ·  For the Horde"
+}
