@@ -1,0 +1,74 @@
+{
+ "out": "patch_notes_1_6_0.png",
+ "title": "Guild Board 1.6.0",
+ "sub": "PATCH NOTES  \u00b7  DUNGEON QUESTS, DING UNLOCKS AND SOUL SHARDS",
+ "rows": [
+  {
+   "label": "NEW",
+   "color": [
+    232,
+    185,
+    100
+   ],
+   "items": [
+    [
+     "Dungeon quests",
+     "Every quest your group has for the run, who has it and who's done. Share or Ask in one click."
+    ],
+    [
+     "Ding unlocks",
+     "Level up and the popup names your new trainer spells and class quests. Thanks Blexas."
+    ],
+    [
+     "Soul Shard button",
+     "Warlocks get a draggable box that deletes one shard per click. Thanks John."
+    ],
+    [
+     "Auto-roll",
+     "Greed on gear, Pass on the rest. Off until you turn it on in the minimap menu."
+    ]
+   ]
+  },
+  {
+   "label": "BETTER",
+   "color": [
+    120,
+    170,
+    235
+   ],
+   "items": [
+    [
+     "Sell junk",
+     "Swap gear is safe and there's a Keep list for anything you never want sold. Thanks medi."
+    ],
+    [
+     "Gray quests",
+     "One button in the quest log drops every quest that's gray to you."
+    ],
+    [
+     "Send needs",
+     "The mail button now says who gets what and fills in the full name."
+    ],
+    [
+     "Minimap",
+     "Left-click opens Party & Upkeep. The To-Do List takes a break and comes back later."
+    ]
+   ]
+  },
+  {
+   "label": "FIXED",
+   "color": [
+    90,
+    200,
+    110
+   ],
+   "items": [
+    [
+     "Dungeon error",
+     "Party & Upkeep no longer throws an error once you zone into an instance."
+    ]
+   ]
+  }
+ ],
+ "footer": "Update from the pin in #addons  \u00b7  CurseForge auto updates once approved  \u00b7  /gb bug to report issues"
+}

@@ -2,6 +2,18 @@
 
 ## Guild Board
 
+### 1.6.0 (2026-11-21)
+- **Dungeon quests for the whole group:** the Dungeon tab now lists every quest anyone in your party has for that dungeon, who has it and who already finished it. Share it with one click, or Ask the person who has it. Synced silently between Guild Board users.
+- **Ding popups (Blexas):** when you or a guildie levels up, the popup now names the iconic trainer spells and class quests that just opened up for that class, checked against WoW Forever levels.
+- **Soul Shard button (John):** warlocks get a small draggable box with a Delete 1 shard button. Not a warlock? `/gb shards` turns it on to test.
+- **Sell junk** now protects your swap gear and has a Keep list for anything you never want sold (medi). Selling BoE gear is an opt-in checkbox.
+- **Auto-roll:** off by default. Turn it on from the minimap menu to Greed on gear and Pass on the rest.
+- **Abandon gray quests:** one button in the quest log drops every quest that is gray to you.
+- **Smart Send needs:** the mail button now reads "Give <name> <item>" and fills in the full name.
+- **Minimap left-click opens Party & Upkeep.** The To-Do List is out for now and will come back in a later update.
+- The guild window is now "Guild quests & flights". The Character Card is Shift+click only.
+- Fixed: Party & Upkeep threw an error inside dungeons.
+
 ### 1.5.1 (2026-11-15)
 Same-day cleanup from the first hour of 1.5.0.
 - **Renamed for clarity:** Game Plan is now **To-Do List** and Tracker is now **Party & Upkeep**. Same windows, same buttons, clearer names. `/todo` opens the list; `/plan` still works.

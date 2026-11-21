@@ -1,8 +1,8 @@
 ## Interface: 16001, 11509
 ## Title: Guild Board
-## Notes: Tooltips show who in the guild needs an item, can make it, or would upgrade from it. To-Do List with an arrow, party quests and quest sharing, and a dungeon tab. Alt+click an item to say you need it.
+## Notes: Tooltips show who in the guild needs an item, can make it, or would upgrade from it. Party & Upkeep with quest sharing and a dungeon tab, junk selling, auto-roll, ding unlocks. Alt+click an item to say you need it.
 ## Author: Kris + Claude
-## Version: 1.5.1
+## Version: 1.6.0
 ## SavedVariables: GuildBoardDB
 ## OptionalDeps: ClaudeTasks
 ## X-Curse-Project-ID: 1806889
@@ -11,8 +11,12 @@ Core.lua
 GuildBoard.lua
 Needs.lua
 Extras.lua
+Junk.lua
+AutoRoll.lua
+QuestClean.lua
+SoulShards.lua
+Unlocks.lua
 Social.lua
 Paste.lua
 Party.lua
 Tracker.lua
-Plan.lua

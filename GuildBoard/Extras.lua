@@ -369,7 +369,7 @@ local menu
 local function toggleMenu(anchor)
   if not menu then
     menu = CreateFrame("Frame", "GuildBoardMenu", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
-    menu:SetSize(150, 118); menu:SetFrameStrata("DIALOG")
+    menu:SetSize(170, 118); menu:SetFrameStrata("DIALOG")
     if menu.SetBackdrop then
       menu:SetBackdrop({ bgFile = "Interface\\ChatFrame\\ChatFrameBackground", edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 12,
         insets = { left = 3, right = 3, top = 3, bottom = 3 } })
@@ -377,18 +377,28 @@ local function toggleMenu(anchor)
     end
     local items = {
       { "Party & Upkeep", function() if ns.toggleTracker then ns.toggleTracker() end end },
+      { "Bank", function() if ns.toggleBank then ns.toggleBank() end end },
+      { "Weapon swap", function() if ns.toggleSwap then ns.toggleSwap() end end },
+      { "Guild Lottery", function() if ns.toggleLottery then ns.toggleLottery() end end },
       { "Dungeons", function() togglePicker(anchor) end },
       { "Sync guild", function() if ns.syncGuild then ns.syncGuild() end end },
-      { "Guild window", function() SlashCmdList["GUILDBOARD"]("") end },
-      { "Character Card", function() if ns.paste then ns.paste() end end },
+      { "Guild quests & flights", function() SlashCmdList["GUILDBOARD"]("") end },
+      { "Auto-roll", function() if ns.toggleAutoRoll then ns.toggleAutoRoll() end end, "auto" },
     }
-    table.insert(items, 1, { "To-Do List", function() if ns.togglePlan then ns.togglePlan() end end })
+    if ns.togglePlan then table.insert(items, 1, { "To-Do List", function() ns.togglePlan() end }) end
+    -- only show buttons for features this copy actually has (the guild release leaves some out)
+    local need = { ["Bank"] = "toggleBank", ["Weapon swap"] = "toggleSwap", ["Guild Lottery"] = "toggleLottery", ["Auto-roll"] = "toggleAutoRoll" }
+    for i = #items, 1, -1 do local f = need[items[i][1]]; if f and not ns[f] then table.remove(items, i) end end
     menu:SetHeight(16 + #items * 26)
     for i, it in ipairs(items) do
       local b = CreateFrame("Button", nil, menu, "UIPanelButtonTemplate")
-      b:SetSize(134, 22); b:SetPoint("TOP", 0, -8 - (i - 1) * 26); b:SetText(it[1])
+      b:SetSize(154, 22); b:SetPoint("TOP", 0, -8 - (i - 1) * 26); b:SetText(it[1])
       b:SetScript("OnClick", function() menu:Hide(); local ok, err = pcall(it[2]); if not ok then print("Guild Board: " .. tostring(err)) end end)
+      if it[3] == "auto" then menu.autoBtn = b end
     end
+    menu:SetScript("OnShow", function()
+      if menu.autoBtn and ns.autoRollOn then menu.autoBtn:SetText(ns.autoRollOn() and "Auto-roll: ON" or "Auto-roll: OFF") end
+    end)
     tinsert(UISpecialFrames, "GuildBoardMenu")
   end
   if menu:IsShown() then menu:Hide(); return end
@@ -423,12 +433,12 @@ local function makeMinimapButton()
   b:SetScript("OnClick", function(_, btn)
     if IsShiftKeyDown() and ns.paste then ns.paste()
     elseif btn == "RightButton" then toggleMenu(b)
-    elseif ns.togglePlan then ns.togglePlan() else toggleMenu(b) end
+    elseif ns.toggleTracker then ns.toggleTracker() else toggleMenu(b) end
   end)
   b:SetScript("OnEnter", function()
     GameTooltip:SetOwner(b, "ANCHOR_LEFT"); GameTooltip:SetText("Guild Board")
-    GameTooltip:AddLine("Left-click: To-Do List (your checklist, with an arrow to the next stop)", 1, 1, 1)
-    GameTooltip:AddLine("Right-click: menu (Party & Upkeep, dungeons, guild window, Character Card)", 1, 1, 1)
+    GameTooltip:AddLine("Left-click: Party & Upkeep (repairs, bags, quests to share, dungeon quests)", 1, 1, 1)
+    GameTooltip:AddLine("Right-click: menu (Party & Upkeep, dungeons, guild quests & flights, auto-roll)", 1, 1, 1)
     GameTooltip:AddLine("Shift+click: Character Card (copy your character to paste)", 1, 1, 1)
     GameTooltip:AddLine("Alt+click any item: I need this", 1, 1, 1)
     GameTooltip:Show()

@@ -1,0 +1,12 @@
+{
+ "from": "Slixx",
+ "embeds": [
+  {
+   "title": "🗡️  Guild Board 1.6.0 is out",
+   "link": true,
+   "description": "Dungeon night just got easier. Zone in and the **Dungeon tab** shows every quest your group has for that run, who still needs it and who's done, with **Share** and **Ask** buttons right there.\n\nAlso new: **ding popups** that tell you which spells and class quests just unlocked (thanks Blexas), a **Soul Shard delete button** for warlocks (thanks John), and **Sell junk** that won't touch your swap gear (thanks medi).\n\nHeads up: minimap left-click now opens **Party & Upkeep**. The To-Do List is taking a break and will be back.\n\n**[⬇️  Download 1.6.0](https://github.com/KrisHendo09/guild-board/releases/latest)**  then fully restart WoW",
+   "image": "announce/patch_notes_1_6_0.png"
+  }
+ ],
+ "footer": "Something busted? Type /gb bug in game  ·  For the Horde"
+}

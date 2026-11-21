@@ -21,12 +21,12 @@ local roster = {}   -- [short name] = { name, level, class, zone, online, daysAw
 local function readRoster()
   local out = {}
   for i = 1, (GetNumGuildMembers and GetNumGuildMembers() or 0) do
-    local name, _, rankIndex, level, class, zone, note, onote, online = GetGuildRosterInfo(i)
+    local name, _, rankIndex, level, class, zone, note, onote, online, _, classFile = GetGuildRosterInfo(i)
     if name then
       local y, mo, d, h = 0, 0, 0, 0
       if not online and GetGuildRosterLastOnline then y, mo, d, h = GetGuildRosterLastOnline(i) end
       local days = (y or 0) * 365 + (mo or 0) * 30 + (d or 0) + (h or 0) / 24
-      out[(name:gsub("%-.*$", ""))] = { name = name, level = level or 0, class = class or "?", zone = zone or "", online = online and true or false,
+      out[(name:gsub("%-.*$", ""))] = { name = name, level = level or 0, class = class or "?", classFile = classFile, zone = zone or "", online = online and true or false,
         daysAway = online and 0 or days, note = note or "", onote = onote or "", rankIndex = rankIndex or 9 }
     end
   end
@@ -119,6 +119,8 @@ local function checkDings()
     local old = lastLevels[nm]
     if baseline and old and r.level > old and nm ~= short(me()) then
       local msg = nm .. " hit " .. r.level .. "!"
+      local extra = ns.unlockText and ns.unlockText(r.classFile or r.class, old, r.level, false)
+      if extra then msg = msg .. " " .. extra end
       if RaidNotice_AddMessage and RaidWarningFrame then RaidNotice_AddMessage(RaidWarningFrame, msg, ChatTypeInfo and ChatTypeInfo.GUILD or { r = 0.25, g = 1, b = 0.25 }) end
       print(GREEN .. "Guild Board|r: " .. msg)
       if PlaySound and SOUNDKIT and SOUNDKIT.UI_GUILD_LEVEL_UP then pcall(PlaySound, SOUNDKIT.UI_GUILD_LEVEL_UP) end
@@ -415,6 +417,8 @@ ns.partyGearText = function()
 end
 
 -- ===== window sections =====
+-- the guild window shows these in this order (the roster and level race live on the Discord board now)
+ns.windowSections = { shared = sharedText, shame = shameText, hearths = hearthText }
 ns.socialText = function()
   local parts = {}
   for _, fn in ipairs({ raceText, sharedText, shameText, hearthText }) do

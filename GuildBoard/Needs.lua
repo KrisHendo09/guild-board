@@ -300,7 +300,8 @@ local function bagSlots()
   return nslots, info
 end
 
-local function fillMail()
+-- first guildie who needs something you're carrying: who, itemID, how many they still need, your stacks
+local function needMatch()
   local self = me()
   local nslots, info = bagSlots()
   local have = {}
@@ -313,8 +314,19 @@ local function fillMail()
   for who, n in pairs(db().needs) do
     if ns.canon(who) ~= self then
       for id, left in pairs(n.items or {}) do
-        if left > 0 and have[id] then
-          local to = ns.canon(who)
+        if left > 0 and have[id] then return who, id, left, have[id] end
+      end
+    end
+  end
+end
+
+local function fillMail()
+  do
+    local who, id, left, stacks = needMatch()
+    if not who then print(GREEN .. "Guild Board|r: you are not carrying anything a guildie needs."); return end
+    local have = { [id] = stacks }
+    do
+          local to = ns.display(who)   -- WoW Forever wants the full name ("Jay Spaceman")
           SendMailNameEditBox:SetText(to)
           if SendMailSubjectEditBox then SendMailSubjectEditBox:SetText(itemName(id)) end
           local slot, sent = 1, 0
@@ -331,15 +343,20 @@ local function fillMail()
             slot, sent = slot + 1, sent + take
           end
           print(GREEN .. "Guild Board|r: mail ready for " .. short(who) .. ": " .. sent .. " " .. itemName(id) .. ". Click Send.")
-          return
-        end
-      end
     end
   end
-  print(GREEN .. "Guild Board|r: you are not carrying anything a guildie needs.")
 end
 
 local mailButton
+local function refreshMailButton()
+  if not mailButton then return end
+  local who, id, left = needMatch()
+  if not who then mailButton:Hide(); return end
+  mailButton:SetText("Give " .. short(who) .. " " .. itemName(id))
+  mailButton:SetWidth(math.min(260, (mailButton:GetFontString() and mailButton:GetFontString():GetStringWidth() or 120) + 24))
+  mailButton:Show()
+end
+ns.refreshNeedsMailButton = refreshMailButton
 local function makeMailButton()
   if mailButton or not SendMailFrame then return end
   -- sits just outside the mail window's top right corner, where the stock mail UI can't cover it
@@ -348,10 +365,11 @@ local function makeMailButton()
   mailButton:SetFrameStrata("HIGH")
   mailButton:SetPoint("TOPLEFT", MailFrame or SendMailFrame, "TOPRIGHT", 6, -28)
   mailButton:SetText("Send needs")
+  mailButton:Hide()
   mailButton:SetScript("OnClick", function() local ok, err = pcall(fillMail); if not ok then print("Guild Board: " .. tostring(err)) end end)
   mailButton:SetScript("OnEnter", function(b)
     GameTooltip:SetOwner(b, "ANCHOR_RIGHT"); GameTooltip:SetText("Guild Board")
-    GameTooltip:AddLine("Fills in a mail to a guildie who needs something you are carrying. You still click Send.", 1, 1, 1, true)
+    GameTooltip:AddLine("A guildie Alt+clicked this item as something they need, and you're carrying it. Click to fill in the mail; you still click Send.", 1, 1, 1, true)
     GameTooltip:Show()
   end)
   mailButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -370,8 +388,9 @@ ev:SetScript("OnEvent", ns.guard("needs", function(_, e)
     if bagTimer then return end
     bagTimer = true
     C_Timer.After(5, function() bagTimer = nil; pcall(broadcastNeeds, false) end)
+    pcall(refreshMailButton)
   elseif e == "MAIL_SHOW" then
-    pcall(makeMailButton)
+    pcall(makeMailButton); pcall(refreshMailButton)
   else
     if scanTimer then return end
     scanTimer = true

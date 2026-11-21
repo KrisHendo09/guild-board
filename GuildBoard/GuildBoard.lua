@@ -137,7 +137,7 @@ local function onMessage(prefix, msg, channel, sender)
     -- party sync is the only thing that talks over the party channel
     if (channel == "PARTY" or channel == "RAID" or channel == "INSTANCE_CHAT") and ns.onParty then
       local k, r = msg:match("^(%u)%^?(.*)$")
-      if k == "S" or k == "P" or k == "T" or k == "A" or k == "Z" then
+      if k == "S" or k == "P" or k == "T" or k == "A" or k == "Z" or k == "F" or k == "M" then
         if ns.safe then ns.safe("party", ns.onParty, k, ns.canon(sender), { strsplit(SEP, r or "") }) else pcall(ns.onParty, k, ns.canon(sender), { strsplit(SEP, r or "") }) end
       end
     end
@@ -157,7 +157,7 @@ local function onMessage(prefix, msg, channel, sender)
   elseif kind == "R" then
     shareKnown()
   elseif ns.handlers and ns.handlers[kind] then
-    local FEATURE = { N = "needs", C = "crafts", G = "upgrades", W = "dungeons", Q = "quests", K = "deaths", H = "hearths", V = "version", X = "killswitch", B = "bugshare" }
+    local FEATURE = { N = "needs", C = "crafts", G = "upgrades", W = "dungeons", Q = "quests", K = "deaths", H = "hearths", V = "version", X = "killswitch", B = "bugshare", O = "lottery" }
     if ns.safe then ns.safe(FEATURE[kind] or ("msg-" .. kind), ns.handlers[kind], sender, f) else pcall(ns.handlers[kind], sender, f) end
   end
 end
@@ -272,7 +272,7 @@ local function show(text)
     frame:EnableMouse(true); frame:SetMovable(true); frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", frame.StartMoving); frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
     local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    title:SetPoint("TOP", 0, -10); title:SetText("Guild Board  (the Discord board updates on its own)   Esc closes")
+    title:SetPoint("TOP", 0, -10); title:SetText("Guild quests & flights   (roster and levels are on the Discord board)   Esc closes")
     local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton"); close:SetPoint("TOPRIGHT", 2, 2)
     local scroll = CreateFrame("ScrollFrame", "GuildBoardScroll", frame, "UIPanelScrollFrameTemplate")
     scroll:SetPoint("TOPLEFT", 12, -32); scroll:SetPoint("BOTTOMRIGHT", -32, 12)
@@ -285,12 +285,11 @@ local function show(text)
   end
   if not text then
     local parts = {}
-    local ok, r = pcall(ns.rosterText or rosterText)
-    parts[#parts + 1] = ok and r or rosterText()
-    for _, k in ipairs({ "wantsText", "needsText", "socialText" }) do
-      if ns[k] then local ok2, t = pcall(ns[k]); if ok2 and t then parts[#parts + 1] = t end end
-    end
-    parts[#parts + 1] = "\n/gb bug what happened  = bug report     Minimap button: left-click To-Do List, right-click menu (Party & Upkeep, dungeons)"
+    local S = ns.windowSections or {}
+    local function add(fn) if fn then local ok2, t = pcall(fn); if ok2 and t and t ~= "" then parts[#parts + 1] = t end end end
+    add(S.shared); add(ns.needsText); add(ns.wantsText); add(S.shame); add(S.hearths)
+    if #parts == 0 then local ok, r = pcall(ns.rosterText or rosterText); parts[#parts + 1] = ok and r or rosterText() end   -- Social.lua missing: fall back
+    parts[#parts + 1] = "\n/gb bug what happened  = bug report     Minimap: left-click Party & Upkeep, right-click menu, Shift+click Character Card"
     text = table.concat(parts, "\n")
   end
   frame.edit:SetText(text)
@@ -364,6 +363,10 @@ SlashCmdList["GUILDBOARD"] = function(arg)
     else ns.setFeature(rest:lower(), cmd == "enable") end
   elseif cmd == "sync" then
     ns.syncGuild()
+  elseif cmd == "shards" or cmd == "shard" then
+    if ns.shardsCmd then ns.shardsCmd() end
+  elseif cmd == "lotto" or cmd == "lottery" then
+    if ns.lottoCmd then ns.lottoCmd(rest) end
   else
     local ok, err = pcall(show)
     if not ok then print("Guild Board error: " .. tostring(err)) end

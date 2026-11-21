@@ -71,18 +71,18 @@ local function questLog()        -- { id, title, zone, complete }
             local objs = C_QuestLog.GetQuestObjectives(q.questID)
             if not objs or #objs == 0 then done = false end
           end
-          out[#out + 1] = { id = q.questID, title = q.title or ("Quest " .. q.questID), zone = zone, complete = done }
+          out[#out + 1] = { id = q.questID, title = q.title or ("Quest " .. q.questID), zone = zone, complete = done, level = q.level }
         end
       end
     end
   elseif GetNumQuestLogEntries then
     for i = 1, GetNumQuestLogEntries() do
-      local title, _, _, isHeader, _, isComplete, _, id = GetQuestLogTitle(i)
+      local title, qlevel, _, isHeader, _, isComplete, _, id = GetQuestLogTitle(i)
       if isHeader then zone = title or ""
       elseif title and id then
         local done = isComplete == 1 or isComplete == true
         if done and GetNumQuestLeaderBoards and GetNumQuestLeaderBoards(i) == 0 then done = false end
-        out[#out + 1] = { id = id, title = title, zone = zone, complete = done }
+        out[#out + 1] = { id = id, title = title, zone = zone, complete = done, level = qlevel }
       end
     end
   end
@@ -188,7 +188,11 @@ local function party(add, shareBtn)
   if opt("pshare") then
     local mine = P.shareable()
     for nm, d in pairs(data) do
-      if d.answered then for id in pairs(d.wants or {}) do if mine[id] then share[#share + 1] = { id = id, title = mine[id], who = nm } end end end
+      if d.answered then
+        for id in pairs(d.wants or {}) do
+          if mine[id] and not (P.giveBlocked and P.giveBlocked(nm, id)) then share[#share + 1] = { id = id, title = mine[id], who = nm } end
+        end
+      end
     end
     table.sort(share, function(a, b) return a.title < b.title end)
   end
@@ -297,34 +301,71 @@ local function shareTab(add)
   local data = P.data()
   local mine = P.shareable()
   local log = ns.myQuests and ns.myQuests() or {}
-  local give, take, waiting = {}, {}, {}
+  local here = GetRealZoneText and GetRealZoneText() or ""
+  local myMeta = {}
+  for _, q in ipairs(questLog()) do myMeta[q.id] = q end
+  local give, take, waiting, blocked = {}, {}, {}, {}
   for nm, d in pairs(data) do
     if d.answered then
-      for id in pairs(d.wants or {}) do if mine[id] then give[#give + 1] = { id = id, title = mine[id], who = nm } end end
+      for id in pairs(d.wants or {}) do
+        if mine[id] then
+          local why = P.giveBlocked and P.giveBlocked(nm, id)
+          local m = myMeta[id] or {}
+          if why then blocked[#blocked + 1] = mine[id] .. GRAY .. "  " .. ns.display(nm) .. " " .. why .. "|r"
+          else give[#give + 1] = { id = id, title = mine[id], who = nm, zone = m.zone or "", level = m.level or 0 } end
+        end
+      end
     else waiting[#waiting + 1] = ns.display(nm) end
     for id in pairs(d.quests or {}) do
-      if not log[id] and not P.completed(id) then take[#take + 1] = { id = id, title = questTitle(id), who = nm } end
+      if not log[id] and not P.completed(id) then
+        local m = (d.meta and d.meta[id]) or {}
+        local title = questTitle(id)
+        local why = (P.takeBlocked and P.takeBlocked(nm, id)) or ((P.prereqOK and not P.prereqOK(id)) and "you need an earlier quest first")
+        if why then blocked[#blocked + 1] = title .. GRAY .. "  " .. why .. "|r"
+        else take[#take + 1] = { id = id, title = title, who = nm, zone = m.zone or "", level = m.level or 0 } end
+      end
     end
   end
-  local function byTitle(a, b) if a.title ~= b.title then return a.title < b.title end return a.who < b.who end
-  table.sort(give, byTitle); table.sort(take, byTitle)
+  -- your current zone first, then by zone, then by level
+  local function order(a, b)
+    local ah, bh = a.zone == here and a.zone ~= "", b.zone == here and b.zone ~= ""
+    if ah ~= bh then return ah end
+    if a.zone ~= b.zone then return a.zone < b.zone end
+    if a.level ~= b.level then return a.level < b.level end
+    if a.title ~= b.title then return a.title < b.title end
+    return a.who < b.who
+  end
+  table.sort(give, order); table.sort(take, order)
+  local function line(s2, dir)
+    local lv = (s2.level and s2.level > 0) and (YELLOW .. "[" .. s2.level .. "]|r ") or ""
+    local z = (s2.zone and s2.zone ~= "") and ("  " .. s2.zone) or ""
+    return lv .. s2.title .. GRAY .. z .. "  " .. dir .. " " .. ns.display(s2.who) .. "|r"
+  end
   local room = 20
   if #give > 0 then
     add(GOLD .. "YOU CAN SHARE|r", true)
-    for i, s in ipairs(give) do
+    for i, s2 in ipairs(give) do
       if i > 10 then add(GRAY .. "+" .. (#give - 10) .. " more after these|r"); break end
-      add(s.title .. GRAY .. "  to " .. ns.display(s.who) .. "|r", false, nil, { btn = "Share", fn = function() P.share(s.id); C_Timer.After(1, function() ns.partyRefresh(true) end) end })
+      add(line(s2, "to"), false, nil, { btn = "Share", fn = function() P.share(s2.id); C_Timer.After(1.5, function() ns.partyRefresh(true) end) end })
       room = room - 1
     end
   end
   if #take > 0 then
     add(GOLD .. "THEY CAN SHARE WITH YOU|r", true)
-    for i, s in ipairs(take) do
+    for i, s2 in ipairs(take) do
       if i > math.max(room - 2, 5) then add(GRAY .. "+" .. (#take - i + 1) .. " more after these|r"); break end
-      add(s.title .. GRAY .. "  from " .. ns.display(s.who) .. "|r", false, nil, { btn = "Ask", fn = function() P.ask(s.who, s.id); C_Timer.After(2, function() ns.partyRefresh(true) end) end })
+      add(line(s2, "from"), false, nil, { btn = "Ask", fn = function() P.ask(s2.who, s2.id); C_Timer.After(2, function() ns.partyRefresh(true) end) end })
     end
   end
   if #give == 0 and #take == 0 then add(GREEN .. "Nothing to share.|r" .. GRAY .. " You both have the same shareable quests.|r") end
+  if #blocked > 0 then
+    table.sort(blocked)
+    add(GOLD .. "CAN'T BE SHARED|r", true)
+    for i, t in ipairs(blocked) do
+      if i > 5 then add(GRAY .. "+" .. (#blocked - 5) .. " more|r"); break end
+      add(GRAY .. t .. "|r")
+    end
+  end
   if #waiting > 0 then add(GRAY .. "Still waiting to hear from " .. table.concat(waiting, ", ") .. "|r") end
 end
 
@@ -340,6 +381,15 @@ local function myArea()
   local s = GetSubZoneText and GetSubZoneText() or ""
   if s == "" and GetMinimapZoneText then s = GetMinimapZoneText() or "" end
   return s
+end
+-- Inside instances the game can hand back "secret" values for unit state; comparing one throws an error
+-- (that was the Tracker.lua:432 error). Read them through this and treat secrets as unknown.
+local function unitState(fn, u)
+  if not fn then return nil end
+  local ok, a, b = pcall(fn, u)
+  if not ok then return nil end
+  if issecretvalue and ((a ~= nil and issecretvalue(a)) or (b ~= nil and issecretvalue(b))) then return nil end
+  return a, b
 end
 local function dungeonTab(add)
   if not inDungeon() then add(GRAY .. "Not in a dungeon. This tab fills in by itself when you zone in.|r"); return end
@@ -382,37 +432,60 @@ local function dungeonTab(add)
   for _, u in ipairs(units) do
     local full = UnitName(u) or "?"
     local d = data[ns.canon(full)]
-    local state
-    if UnitIsConnected and not UnitIsConnected(u) then state = RED .. "offline|r"
-    elseif UnitIsDeadOrGhost and UnitIsDeadOrGhost(u) then state = RED .. "dead|r"
+    local state = ""
+    local online = unitState(UnitIsConnected, u)
+    local dead = unitState(UnitIsDeadOrGhost, u)
+    if online == false then state = RED .. "offline|r"
+    elseif dead == true then state = RED .. "dead|r"
     else
-      local inR, checked
-      if UnitInRange then inR, checked = UnitInRange(u) end
+      local inR, checked = unitState(UnitInRange, u)
       if checked == false or inR == nil then state = ""
-      elseif inR then state = GREEN .. "with you|r"
+      elseif inR == true then state = GREEN .. "with you|r"
       else state = YELLOW .. "out of range|r" end
     end
     local sub = d and d.sub and d.sub ~= "" and d.sub or nil
     add(full .. "  " .. state .. GRAY .. (sub and ("  " .. sub) or "") .. "|r")
   end
 
-  -- quests for this dungeon
+  -- quests for this dungeon, across the whole party. Everyone's Guild Board sends its quest log silently over the
+  -- party addon channel when you zone in (and whenever quests change), so this shows who has what, who's done,
+  -- and gives a Share button (you have it, they can take it) or an Ask button (they have it, you can take it).
   local mine = P and P.shareable() or {}
-  local want = {}
-  for nm, d in pairs(data) do if d.answered then for id in pairs(d.wants or {}) do want[id] = want[id] or nm end end end
-  local list = {}
-  for _, q in ipairs(questLog()) do if q.zone == name then list[#list + 1] = q end end
+  local myLog = {}
+  for _, q in ipairs(questLog()) do if q.zone == name then myLog[q.id] = q end end
+  local ids, seen = {}, {}
+  local function addId(id) if not seen[id] then seen[id] = true; ids[#ids + 1] = id end end
+  for id in pairs(myLog) do addId(id) end
+  for _, d in pairs(data) do for id, m in pairs(d.meta or {}) do if m.zone == name then addId(id) end end end
+  table.sort(ids, function(a, b) return (myLog[a] and 0 or 1) < (myLog[b] and 0 or 1) or ((myLog[a] and 0 or 1) == (myLog[b] and 0 or 1) and a < b) end)
   add(GOLD .. "QUESTS FOR THIS DUNGEON|r", true)
-  if #list == 0 then add(GRAY .. "None in your log.|r") end
-  for i, q in ipairs(list) do
-    if i > 8 then add(GRAY .. "+" .. (#list - 8) .. " more|r"); break end
-    local have = 0
-    for _, d in pairs(data) do if d.quests and d.quests[q.id] then have = have + 1 end end
-    local t = q.title .. (q.complete and (GREEN .. "  done|r") or "") .. GRAY .. "  " .. (have + 1) .. " of " .. (#units + 1) .. " have it|r"
-    if want[q.id] and mine[q.id] then
-      add(t, false, nil, { btn = "Share", fn = function() P.share(q.id); C_Timer.After(1, function() ns.partyRefresh(true) end) end })
+  if #ids == 0 then add(GRAY .. (#units > 0 and "Nobody in the group has a quest for here." or "None in your log.") .. "|r") end
+  for i, id in ipairs(ids) do
+    if i > 10 then add(GRAY .. "+" .. (#ids - 10) .. " more|r"); break end
+    local q = myLog[id]
+    local title = q and q.title or questTitle(id)
+    local who, takers, owner = {}, {}, nil
+    if q then who[#who + 1] = "you" .. (q.complete and (GREEN .. " (done)|r") or "") end
+    for nm, d in pairs(data) do
+      local m = d.meta and d.meta[id]
+      if m or (d.quests and d.quests[id]) then
+        who[#who + 1] = ns.display(nm) .. ((m and m.done) and (GREEN .. " (done)|r") or "")
+        owner = owner or nm
+      elseif d.answered and d.wants and d.wants[id] and not (P.giveBlocked and P.giveBlocked(nm, id)) then
+        takers[#takers + 1] = ns.display(nm)
+      end
+    end
+    local t = title .. GRAY .. "  " .. table.concat(who, ", ") .. "|r"
+    if q and mine[id] and #takers > 0 then
+      add(t .. YELLOW .. "  " .. table.concat(takers, ", ") .. " can take it|r", false, nil,
+        { btn = "Share", fn = function() P.share(id); C_Timer.After(1, function() ns.partyRefresh(true) end) end })
+    elseif not q and owner then
+      local why = (P.takeBlocked and P.takeBlocked(owner, id)) or ((P.completed and P.completed(id)) and "you already did it")
+        or ((P.prereqOK and not P.prereqOK(id)) and "you need an earlier quest first")
+      if why then add(t .. GRAY .. "  (" .. why .. ")|r")
+      else add(t, false, nil, { btn = "Ask", fn = function() P.ask(owner, id) end }) end
     else
-      add(t, false, nil, { plan = { key = "q" .. q.id, text = q.title, questID = q.id } })
+      add(t)
     end
   end
 

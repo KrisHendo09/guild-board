@@ -22,7 +22,7 @@ local errorCount, disabledThisSession = {}, {}
 
 local function version()
   local get = (C_AddOns and C_AddOns.GetAddOnMetadata) or GetAddOnMetadata
-  return (get and get("GuildBoard", "Version")) or "?"
+  local v = get and get("GuildBoard", "Version"); return type(v) == "string" and v or "?"
 end
 ns.version = version
 
