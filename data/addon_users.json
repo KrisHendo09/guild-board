@@ -1,36 +1,84 @@
 {
  "note": "Who has the Guild Board addon, as seen by the exporter's copy of the addon in the last 30 days.",
- "updated": 1794771681,
+ "updated": 1795230322,
  "users": {
+  "Ahh": {
+   "class": "Mage",
+   "level": 10,
+   "seen": 1795048052,
+   "version": "1.3.0"
+  },
   "Blexas": {
    "class": "Hunter",
-   "level": 24,
-   "seen": 1794771246,
-   "version": "1.3.1"
+   "level": 26,
+   "seen": 1795069217,
+   "version": "1.5.1"
   },
   "Daddy": {
    "class": "Shaman",
-   "level": 24,
-   "seen": 1794771248,
-   "version": "1.4.0"
+   "level": 26,
+   "seen": 1794972455,
+   "version": "1.5.1"
+  },
+  "Damus": {
+   "class": "Shaman",
+   "level": 32,
+   "seen": 1794874279,
+   "version": null
   },
   "Datcat": {
    "class": "Paladin",
-   "level": 24,
-   "seen": 1794771187,
-   "version": "1.4.0"
+   "level": 26,
+   "seen": 1794886989,
+   "version": "1.5.0"
   },
   "Doggie": {
    "class": "Warrior",
    "level": 16,
-   "seen": 1794723237,
-   "version": null
+   "seen": 1794986295,
+   "version": "1.5.1"
+  },
+  "Dr": {
+   "class": "Priest",
+   "level": 11,
+   "seen": 1795070667,
+   "version": "1.5.1"
   },
   "Jay": {
    "class": "Warlock",
-   "level": 24,
-   "seen": 1794768537,
-   "version": "1.3.0"
+   "level": 27,
+   "seen": 1795058858,
+   "version": "1.5.1"
+  },
+  "Plsona": {
+   "class": "Paladin",
+   "level": 32,
+   "seen": 1795062942,
+   "version": "1.5.1"
+  },
+  "Poplock": {
+   "class": "Warlock",
+   "level": 15,
+   "seen": 1794876364,
+   "version": "1.5.0"
+  },
+  "Rebecca": {
+   "class": "Priest",
+   "level": 18,
+   "seen": 1795045074,
+   "version": "1.5.1"
+  },
+  "Resalonetwo": {
+   "class": "Paladin",
+   "level": 25,
+   "seen": 1794804225,
+   "version": "1.3.1"
+  },
+  "Tauren": {
+   "class": "Shaman",
+   "level": 7,
+   "seen": 1795046334,
+   "version": "1.5.1"
   },
   "Yapper": {
    "class": "Rogue",
