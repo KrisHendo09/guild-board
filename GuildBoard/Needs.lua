@@ -158,6 +158,11 @@ local function newer(a, b)   -- is version a newer than b
   end
   return false
 end
+-- for the minimap tooltip: my version, the newest seen in the guild, and whether I'm behind
+ns.versionStatus = function()
+  local mine, top = myVersion(), GuildBoardDB and GuildBoardDB.newestSeen
+  return mine, top, (top and newer(top, mine)) and true or false
+end
 -- update nag: once anyone in the guild is seen on a newer version, this copy nags its owner on screen
 -- right away, at every login, and every 45 minutes until they update. Remembered across sessions.
 local nagTicker

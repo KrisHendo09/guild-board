@@ -3,6 +3,7 @@
 ## Guild Board
 
 ### Unreleased
+- The minimap button's tooltip shows your version and says if you're out of date.
 - Guildie ding popups only list what opened at their newest level, so a two-level jump stays one short line.
 
 ### 1.6.0 (2026-11-21)

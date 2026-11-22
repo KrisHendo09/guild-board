@@ -437,6 +437,14 @@ local function makeMinimapButton()
   end)
   b:SetScript("OnEnter", function()
     GameTooltip:SetOwner(b, "ANCHOR_LEFT"); GameTooltip:SetText("Guild Board")
+    if ns.versionStatus then
+      local mine, top, behind = ns.versionStatus()
+      if behind then
+        GameTooltip:AddLine("Version " .. mine .. "  |cffff4040OUT OF DATE|r: " .. top .. " is out (pin in #addons or CurseForge)", 1, 0.82, 0)
+      else
+        GameTooltip:AddLine("Version " .. mine .. "  |cff33ff99up to date|r", 1, 0.82, 0)
+      end
+    end
     GameTooltip:AddLine("Left-click: Party & Upkeep (repairs, bags, quests to share, dungeon quests)", 1, 1, 1)
     GameTooltip:AddLine("Right-click: menu (Party & Upkeep, dungeons, guild quests & flights, auto-roll)", 1, 1, 1)
     GameTooltip:AddLine("Shift+click: Character Card (copy your character to paste)", 1, 1, 1)
