@@ -244,6 +244,64 @@ def render(data, min_panels=0):
     def vkey(v):
         try: return tuple(int(x) for x in str(v).lstrip('v').split('.')[:3])
         except Exception: return (0,)
+    # ---- right side of the Wall of Heroes: who helped build it (data/feedback.json, kept by the daily
+    #      bug fix patrol) and the dunce corner for anyone caught sending a request meant to break things
+    def credits_and_dunce(im, x0, x1, y0, y1):
+        try: fb = json.load(open(os.path.join(HERE, '..', 'data', 'feedback.json'), encoding='utf-8'))
+        except Exception: fb = {}
+        cred = {}
+        for it in fb.get('items', []):
+            who = (it.get('who') or '').strip()
+            if not who or it.get('status') == 'declined': continue
+            c = cred.setdefault(who, {'shipped': 0, 'queued': 0})
+            c['shipped' if it.get('status') == 'shipped' else 'queued'] += 1
+        crew = sorted(cred.items(), key=lambda kv: (-kv[1]['shipped'], -kv[1]['queued'], kv[0].lower()))
+        split = y0 + 268
+        acc = (180, 140, 255)
+        im = panel(im, [x0, y0, x1, split], outline=acc + (150,)); d = ImageDraw.Draw(im)
+        d.rounded_rectangle([x0, y0, x1, y0 + 5], 2, fill=acc)
+        text(d, (x0 + 16, y0 + 32), 'HELPED BUILD IT', F(18, 'Bold'), acc)
+        text(d, (x1 - 16, y0 + 32), str(len(crew)), F(24, 'Bold'), TXT, 'rm')
+        text(d, (x0 + 16, y0 + 58), 'bug reports and ideas that made it in', F(12, 'Medium'), MUTE)
+        d.line([x0 + 16, y0 + 74, x1 - 16, y0 + 74], fill=acc + (90,))
+        room = int((split - 16 - (y0 + 92)) // 30)
+        for j, (who, c) in enumerate(crew[:room]):
+            ly = y0 + 94 + j * 30
+            tag = ' · '.join(x for x in (f"{c['shipped']} shipped" if c['shipped'] else '', f"{c['queued']} queued" if c['queued'] else '') if x)
+            text(d, (x0 + 16, ly), fit(d, who, F(15, 'Bold'), x1 - x0 - 140), F(15, 'Bold'), TXT if c['shipped'] else MUTE)
+            text(d, (x1 - 16, ly), tag, F(12, 'Medium'), GOLD if c['shipped'] else MUTE, 'rm')
+        if len(crew) > room: text(d, (x1 - 16, split - 18), f"+{len(crew) - room} more", F(12, 'Medium'), MUTE, 'rm')
+        if not crew: text(d, ((x0 + x1) // 2, y0 + 130), 'report a bug in #guild-board', F(14, 'Medium'), MUTE, 'mm')
+        # dunce corner: painted goblin, name on the wood, gone after 7 days
+        dy0 = split + 12; red = (210, 70, 50)
+        dun = [x for x in fb.get('dunce', []) if now - x.get('at', 0) < 7 * 86400]
+        dun.sort(key=lambda x: -x.get('at', 0))
+        art_p = os.path.join(HERE, 'art', 'dunce_goblin.png')
+        bw, bh = x1 - x0, y1 - dy0
+        if os.path.exists(art_p):
+            g = Image.open(art_p).convert('RGBA')
+            sc = max(bw / g.width, bh / g.height); g = g.resize((int(g.width * sc) + 1, int(g.height * sc) + 1), Image.LANCZOS)
+            gx = (g.width - bw) // 2 + int(bw * 0.12); gy = (g.height - bh) // 2
+            g = g.crop((min(gx, g.width - bw), gy, min(gx, g.width - bw) + bw, gy + bh))
+            if not dun:
+                g = Image.blend(g, Image.new('RGBA', g.size, (12, 9, 7, 255)), 0.55)
+            m = Image.new('L', (bw, bh), 0); ImageDraw.Draw(m).rounded_rectangle([0, 0, bw - 1, bh - 1], 10, fill=255)
+            im.paste(g, (x0, dy0), m)
+        ov = Image.new('RGBA', im.size, (0, 0, 0, 0)); od = ImageDraw.Draw(ov)
+        od.rectangle([x0, dy0, x1, dy0 + 46], fill=(8, 5, 3, 170)); od.rectangle([x0, y1 - 62, x1, y1], fill=(8, 5, 3, 185))
+        od.rounded_rectangle([x0, dy0, x1, y1], 10, outline=red + (200,), width=2)
+        im = Image.alpha_composite(im, ov); d = ImageDraw.Draw(im)
+        text(d, (x0 + 16, dy0 + 23), 'DUNCE CORNER', F(18, 'Bold'), red)
+        if dun:
+            others = 'with ' + ', '.join(x.get('who', '?') for x in dun[1:]) if len(dun) > 1 else 'this week'
+            text(d, (x1 - 16, dy0 + 23), fit(d, others, F(12, 'Medium'), bw - 190), F(12, 'Medium'), GOLD if len(dun) > 1 else MUTE, 'rm')
+            text(d, ((x0 + x1) // 2, y1 - 42), fit(d, dun[0].get('who', '?'), F(24, 'Bold'), bw - 30), F(24, 'Bold'), TXT, 'mm')
+            text(d, ((x0 + x1) // 2, y1 - 16), fit(d, dun[0].get('why', ''), F(12, 'Medium'), bw - 24), F(12, 'Medium'), GOLD, 'mm')
+        else:
+            text(d, ((x0 + x1) // 2, y1 - 40), 'Empty. Keep it that way.', F(17, 'Bold'), TXT, 'mm')
+            text(d, ((x0 + x1) // 2, y1 - 17), 'troll requests earn the hat', F(12, 'Medium'), MUTE, 'mm')
+        return im
+
     shame = None
     try: addon = json.load(open(os.path.join(HERE, '..', 'data', 'addon_users.json')))
     except Exception: addon = None
@@ -269,7 +327,8 @@ def render(data, min_panels=0):
         cols = [('HEROES', 'on the latest version or newer', heroes, (90, 200, 110)),
                 ('OLD VERSION', 'time to update', old, (232, 170, 60)),
                 ('NO ADDON', 'grab it from #addons', none, (210, 70, 50))]
-        gap = 14; cw = (X1 - X0 - gap * 2) / 3; lh = 34; top = Y0
+        LX1 = 786; RX0 = 800                     # left: the three version columns  ·  right: credits and the dunce corner
+        gap = 12; cw = (LX1 - X0 - gap * 2) / 3; lh = 34; top = Y0
         foot_y = Y1 - 56
         for ci, (title, sub, lst, acc) in enumerate(cols):
             cx = int(X0 + ci * (cw + gap)); cx2 = int(cx + cw)
@@ -288,21 +347,23 @@ def render(data, min_panels=0):
                 # newer than the published release = a test build
                 if title == 'HEROES' and v and v != '?' and latest and vkey(v) > vkey(latest):
                     tag, tcol = f"v{v} experimental", (180, 140, 255)
-                room_name = cw - 48 - (d.textlength(tag, font=F(13, 'Medium')) if tag else 0)
-                text(d, (cx + 18, ly), fit(d, r['name'], F(16, 'Bold'), room_name), F(16, 'Bold'), col)
-                if tag: text(d, (cx2 - 18, ly), tag, F(13, 'Medium'), tcol, 'rm')
+                if title == 'HEROES' and tag.endswith('experimental'): tag = 'test build'
+                room_name = cw - 36 - (d.textlength(tag, font=F(12, 'Medium')) if tag else 0)
+                text(d, (cx + 14, ly), fit(d, r['name'], F(15, 'Bold'), room_name), F(15, 'Bold'), col)
+                if tag: text(d, (cx2 - 14, ly), tag, F(12, 'Medium'), tcol, 'rm')
             if len(lst) > room: text(d, (cx2 - 18, foot_y - 32), f"+{len(lst) - room} more", F(13, 'Medium'), MUTE, 'rm')
             if not lst: text(d, ((cx + cx2) // 2, top + 130), 'nobody', F(16, 'Medium'), MUTE, 'mm')
-        im = panel(im, [X0, foot_y, X1, Y1], outline=(232, 185, 100, 110)); d = ImageDraw.Draw(im)
+        im = panel(im, [X0, foot_y, LX1, Y1], outline=(232, 185, 100, 110)); d = ImageDraw.Draw(im)
         tot = max(len(rows), 1); have = len(heroes) + len(old)
         text(d, (X0 + 20, foot_y + 28), f"ADDON CREW  {have} of {len(rows)}", F(13, 'Bold'), GOLD)
-        bx = X0 + 250
-        d.rounded_rectangle([bx, foot_y + 20, X1 - 20, foot_y + 36], 8, fill=(40, 30, 22))
-        w = X1 - 20 - bx
+        bx = X0 + 210
+        d.rounded_rectangle([bx, foot_y + 20, LX1 - 20, foot_y + 36], 8, fill=(40, 30, 22))
+        w = LX1 - 20 - bx
         if heroes: d.rounded_rectangle([bx, foot_y + 20, bx + int(w * len(heroes) / tot), foot_y + 36], 8, fill=(90, 200, 110))
         if old:
             x0 = bx + int(w * len(heroes) / tot)
             d.rounded_rectangle([x0, foot_y + 20, x0 + int(w * len(old) / tot), foot_y + 36], 8, fill=(232, 170, 60))
+        im = credits_and_dunce(im, RX0, X1, top, Y1)
         shame = ('guild_wall_of_heroes.png', im)
 
     # keep the same number of Discord posts when the roster shrinks: same-size board with a short note

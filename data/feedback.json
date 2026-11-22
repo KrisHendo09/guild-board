@@ -1,0 +1,118 @@
+{
+ "note": "Guild feedback from Discord, kept by the daily bug fix patrol. Feeds HELPED BUILD IT and DUNCE CORNER on the Wall of Heroes. Names are Discord names as people post them. See tools/bugfix/RUNBOOK.md.",
+ "items": [
+  {
+   "who": "Blexas",
+   "kind": "feature",
+   "title": "Ding popups list new trainer spells",
+   "status": "shipped",
+   "version": "1.6.0",
+   "date": "2026-11-21",
+   "src": "discord 1573504600747548673"
+  },
+  {
+   "who": "Blexas",
+   "kind": "feature",
+   "title": "Ding popups list class quests",
+   "status": "shipped",
+   "version": "1.6.0",
+   "date": "2026-11-21",
+   "src": "discord 1573504677327151195"
+  },
+  {
+   "who": "Blexas",
+   "kind": "feature",
+   "title": "Legacy point earned guild popup",
+   "status": "queued",
+   "date": "2026-11-21",
+   "src": "discord 1573503822846758998"
+  },
+  {
+   "who": "Blexas",
+   "kind": "feature",
+   "title": "Iconic talents on ding",
+   "status": "queued",
+   "date": "2026-11-21",
+   "src": "discord 1573504786395959367"
+  },
+  {
+   "who": "Blexas",
+   "kind": "bug",
+   "title": "Guild Needs list shows odd entries",
+   "status": "queued",
+   "date": "2026-11-21",
+   "src": "discord 1573729899305373867"
+  },
+  {
+   "who": "medi",
+   "kind": "feature",
+   "title": "Sell junk without selling swap gear",
+   "status": "shipped",
+   "version": "1.6.0",
+   "date": "2026-11-21",
+   "src": "in game request"
+  },
+  {
+   "who": "John",
+   "kind": "feature",
+   "title": "Soul Shard cleanup button",
+   "status": "shipped",
+   "version": "1.6.0",
+   "date": "2026-11-21",
+   "src": "in game request"
+  },
+  {
+   "who": "jspaceman",
+   "kind": "bug",
+   "title": "Wall of Heroes missed people on 1.5.1",
+   "status": "shipped",
+   "date": "2026-11-19",
+   "src": "discord 1573150827336704122",
+   "version": "board fix"
+  },
+  {
+   "who": "Plsona",
+   "kind": "bug",
+   "title": "Wall of Heroes missed people on 1.5.1",
+   "status": "shipped",
+   "date": "2026-11-19",
+   "src": "discord 1573150839588266076",
+   "version": "board fix"
+  }
+ ],
+ "dunce": [
+  {
+   "who": "jspaceman",
+   "why": "wanted an addon feature to steal crypto",
+   "at": 1795388790,
+   "src": "discord 1574199390128709854"
+  },
+  {
+   "who": "Blexas",
+   "why": "wanted everyone's mail sent to him",
+   "at": 1795388913,
+   "src": "discord 1574199838046814270"
+  }
+ ],
+ "discord_done": [
+  "1573151107251704039",
+  "1573231498180563097",
+  "1573487688630149230",
+  "1573503822846758998",
+  "1573504600747548673",
+  "1573504677327151195",
+  "1573504786395959367",
+  "1573505466292637818",
+  "1573534719323148430",
+  "1573729899305373867",
+  "1574180047626182838",
+  "1574199140936712223",
+  "1574199175434997892",
+  "1574199390128709854",
+  "1574199838046814270"
+ ],
+ "discord_logged_keep": {
+  "1573150827336704122": "logged 2026-11-22, delete on next run",
+  "1573150839588266076": "logged 2026-11-22, delete on next run"
+ }
+}
