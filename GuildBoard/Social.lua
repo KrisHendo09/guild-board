@@ -119,7 +119,7 @@ local function checkDings()
     local old = lastLevels[nm]
     if baseline and old and r.level > old and nm ~= short(me()) then
       local msg = nm .. " hit " .. r.level .. "!"
-      local extra = ns.unlockText and ns.unlockText(r.classFile or r.class, old, r.level, false)
+      local extra = ns.unlockText and ns.unlockText(r.classFile or r.class, math.max(old, r.level - 1), r.level, false)  -- newest level only, so a multi-level jump stays one short line
       if extra then msg = msg .. " " .. extra end
       if RaidNotice_AddMessage and RaidWarningFrame then RaidNotice_AddMessage(RaidWarningFrame, msg, ChatTypeInfo and ChatTypeInfo.GUILD or { r = 0.25, g = 1, b = 0.25 }) end
       print(GREEN .. "Guild Board|r: " .. msg)

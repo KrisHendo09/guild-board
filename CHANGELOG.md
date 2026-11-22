@@ -2,6 +2,9 @@
 
 ## Guild Board
 
+### Unreleased
+- Guildie ding popups only list what opened at their newest level, so a two-level jump stays one short line.
+
 ### 1.6.0 (2026-11-21)
 - **Dungeon quests for the whole group:** the Dungeon tab now lists every quest anyone in your party has for that dungeon, who has it and who already finished it. Share it with one click, or Ask the person who has it. Synced silently between Guild Board users.
 - **Ding popups (Blexas):** when you or a guildie levels up, the popup now names the iconic trainer spells and class quests that just opened up for that class, checked against WoW Forever levels.
