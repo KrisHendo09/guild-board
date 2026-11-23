@@ -115,6 +115,13 @@ and a short line saying what they asked for.
 - The board redraws on its own (GitHub, every hour at :07) from `data/feedback.json` on main, so pushing the file
   is all it takes. No separate post, no ping.
 
+## Keep the Wall of Heroes versions fresh (added Nov 22, 2026)
+The Wall of Heroes reads who runs which version from `data/addon_users.json`. Nothing else refreshes it, so every
+run does: when GuildBoard.lua (Kris's SavedVariables) is newer than that file's `updated`, run
+`python3 tools/export_addon_users.py <GuildBoard.lua> data/addon_users.json` and commit it with the run's other data
+changes. If the run cannot reach the Legion, use the versions in the newest "Guild errors YYYY-MM-DD.md" note in
+the Guild Feedback Drive folder when one exists. The hourly board job picks the file up on its own.
+
 ## Tell Kris
 End every run with a short summary (no em dashes): bugs seen, what shipped and where, what is waiting on him.
 Include what was logged, deleted and dunced. Nothing found and nothing to ship is a one-line summary.
