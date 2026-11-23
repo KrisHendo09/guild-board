@@ -246,7 +246,7 @@ local function party(add, shareBtn)
       for i, r in ipairs(kept) do
         if i > limit then break end
         add(i .. ". " .. r.q.title .. (r.q.complete and (GREEN .. "  turn in|r") or "") .. GRAY .. "  " .. r.q.zone .. "|r", false, nil,
-          { skipId = r.q.id, plan = { key = "q" .. r.q.id, text = r.q.title, questID = r.q.id } })
+          { skipId = r.q.id, track = r.q.id, plan = { key = "q" .. r.q.id, text = r.q.title, questID = r.q.id } })
       end
       if #kept > limit then
         add(GRAY .. "+" .. (#kept - limit) .. " more|r", false, nil, c.moreQuests and { btn = "Less", fn = function() db().moreQuests = false end }
@@ -602,6 +602,24 @@ local function build()
   end
 end
 
+-- quest log tracking (the same watch list shift-click in the quest log uses)
+local function isWatched(id)
+  if C_QuestLog and C_QuestLog.GetQuestWatchType then return C_QuestLog.GetQuestWatchType(id) ~= nil end
+  local idx = C_QuestLog and C_QuestLog.GetLogIndexForQuestID and C_QuestLog.GetLogIndexForQuestID(id)
+  return idx and IsQuestWatched and IsQuestWatched(idx) and true or false
+end
+local function toggleWatch(id)
+  if isWatched(id) then
+    if C_QuestLog and C_QuestLog.RemoveQuestWatch then C_QuestLog.RemoveQuestWatch(id)
+    else local idx = C_QuestLog.GetLogIndexForQuestID(id); if idx and RemoveQuestWatch then RemoveQuestWatch(idx) end end
+    return
+  end
+  local ok
+  if C_QuestLog and C_QuestLog.AddQuestWatch then ok = C_QuestLog.AddQuestWatch(id)
+  else local idx = C_QuestLog.GetLogIndexForQuestID(id); if idx and AddQuestWatch then AddQuestWatch(idx); ok = true end end
+  if ok == false then print("|cff33ff99Guild Board|r Your quest tracker is full. Untrack something first.") end
+end
+
 local function render()
   if not frame then return end
   local c = db()
@@ -628,6 +646,7 @@ local function render()
         r.skip:SetScript("OnClick", function() local c2 = db(); c2.skip = c2.skip or {}; c2.skip[skipId] = true; ns.trackerRefresh() end)
         r.skip:Show()
       else r.skip:Hide() end
+      r.btn:SetScript("OnEnter", nil); r.btn:SetScript("OnLeave", nil)
       if o.share then
         r.btn:SetText("Share next")
         r.btn:SetScript("OnClick", function() ns.party.share(o.share); C_Timer.After(1, function() ns.partyRefresh(true) end) end)
@@ -639,6 +658,16 @@ local function render()
       elseif x and x.plan and ns.planToggleItem then
         r.btn:SetText(ns.planHas(x.plan.key) and "On list" or "+ To-Do")
         r.btn:SetScript("OnClick", function() pcall(ns.planToggleItem, x.plan); ns.trackerRefresh() end)
+        r.btn:Show()
+      elseif x and x.track then
+        local qid = x.track
+        r.btn:SetText(isWatched(qid) and "Untrack" or "Track")
+        r.btn:SetScript("OnClick", function() toggleWatch(qid); ns.trackerRefresh() end)
+        r.btn:SetScript("OnEnter", function(b)
+          GameTooltip:SetOwner(b, "ANCHOR_LEFT"); GameTooltip:SetText(isWatched(qid) and "Stop tracking" or "Track this quest")
+          GameTooltip:AddLine("Same as shift-clicking it in your quest log: shows it in the objective tracker.", 1, 1, 1, true); GameTooltip:Show()
+        end)
+        r.btn:SetScript("OnLeave", function() GameTooltip:Hide() end)
         r.btn:Show()
       else r.btn:Hide() end
     else r.text:SetText(""); r.btn:Hide(); r.skip:Hide() end
@@ -685,7 +714,7 @@ local ev = CreateFrame("Frame")
 for _, e in ipairs({ "PLAYER_LOGIN", "PLAYER_REGEN_DISABLED", "PLAYER_REGEN_ENABLED", "BAG_UPDATE_DELAYED", "UPDATE_INVENTORY_DURABILITY",
   "PLAYER_EQUIPMENT_CHANGED", "QUEST_LOG_UPDATE", "PLAYER_LEVEL_UP", "TRAINER_SHOW", "SKILL_LINES_CHANGED", "CHAT_MSG_ADDON",
   "GROUP_ROSTER_UPDATE", "ZONE_CHANGED_NEW_AREA", "PLAYER_ENTERING_WORLD", "ZONE_CHANGED", "ZONE_CHANGED_INDOORS",
-  "BOSS_KILL", "ENCOUNTER_END", "PLAYER_DEAD", "UNIT_CONNECTION" }) do pcall(ev.RegisterEvent, ev, e) end
+  "BOSS_KILL", "ENCOUNTER_END", "PLAYER_DEAD", "UNIT_CONNECTION", "QUEST_WATCH_LIST_CHANGED" }) do pcall(ev.RegisterEvent, ev, e) end
 local rangeTick
 ev:SetScript("OnEvent", function(_, e, ...)
   if e == "PLAYER_LOGIN" then
