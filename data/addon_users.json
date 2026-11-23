@@ -1,6 +1,6 @@
 {
  "note": "Who has the Guild Board addon, as seen by the exporter's copy of the addon in the last 30 days.",
- "updated": 1795411339,
+ "updated": 1795413372,
  "users": {
   "Ahh": {
    "class": "Mage",
@@ -16,8 +16,8 @@
   },
   "Bubblegum": {
    "class": "Rogue",
-   "level": 15,
-   "seen": 1795408124,
+   "level": 16,
+   "seen": 1795412634,
    "version": "1.6.0"
   },
   "Daddy": {
@@ -41,13 +41,13 @@
   "Doggie": {
    "class": "Warrior",
    "level": 19,
-   "seen": 1795408117,
+   "seen": 1795412636,
    "version": "1.6.0"
   },
   "Dr": {
    "class": "Priest",
-   "level": 13,
-   "seen": 1795408119,
+   "level": 14,
+   "seen": 1795412635,
    "version": "1.6.0"
   },
   "Houston": {
