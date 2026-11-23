@@ -384,6 +384,7 @@ local function toggleMenu(anchor)
       { "Sync guild", function() if ns.syncGuild then ns.syncGuild() end end },
       { "Guild quests & flights", function() SlashCmdList["GUILDBOARD"]("") end },
       { "Auto-roll", function() if ns.toggleAutoRoll then ns.toggleAutoRoll() end end, "auto" },
+      { "What's in Guild Board", function() if ns.toggleHelp then ns.toggleHelp() end end },
     }
     if ns.togglePlan then table.insert(items, 1, { "To-Do List", function() ns.togglePlan() end }) end
     -- only show buttons for features this copy actually has (the guild release leaves some out)

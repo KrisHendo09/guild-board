@@ -3,6 +3,7 @@
 ## Guild Board
 
 ### Unreleased
+- New "What's in Guild Board" popup at login: every feature in one plain-English line, click one for the details. Tick the box and it stays away until the next version. `/gb help` or the minimap menu opens it any time.
 - Party & Upkeep options (the * button): new Fade option keeps the window see-through until your mouse is on it. Hide in combat now applies the moment you flip it.
 - Party tab: each quest has a Track button that adds it to your objective tracker, same as shift-clicking it in the quest log. Click again to Untrack.
 - The minimap button's tooltip shows your version and says if you're out of date.

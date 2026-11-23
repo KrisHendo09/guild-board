@@ -20,3 +20,4 @@ Social.lua
 Paste.lua
 Party.lua
 Tracker.lua
+Help.lua

@@ -365,6 +365,8 @@ SlashCmdList["GUILDBOARD"] = function(arg)
     ns.syncGuild()
   elseif cmd == "shards" or cmd == "shard" then
     if ns.shardsCmd then ns.shardsCmd() end
+  elseif cmd == "help" or cmd == "new" or cmd == "whatsnew" then
+    if ns.toggleHelp then ns.toggleHelp() end
   elseif cmd == "lotto" or cmd == "lottery" then
     if ns.lottoCmd then ns.lottoCmd(rest) end
   else
