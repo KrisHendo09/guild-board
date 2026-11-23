@@ -3,6 +3,7 @@
 ## Guild Board
 
 ### Unreleased
+- Party & Upkeep options (the * button): new Fade option keeps the window see-through until your mouse is on it. Hide in combat now applies the moment you flip it.
 - Party tab: each quest has a Track button that adds it to your objective tracker, same as shift-clicking it in the quest log. Click again to Untrack.
 - The minimap button's tooltip shows your version and says if you're out of date.
 - Guildie ding popups only list what opened at their newest level, so a two-level jump stays one short line.

@@ -21,7 +21,7 @@ local DEFAULTS = {
   repair = true, repairPct = 50, slots = true, bags = true, bagFree = 4, trainer = true, profcap = true,
   reagents = false, turnins = true, claude = true,
   pshare = true, pquests = true, pupkeep = true, pgear = false, pdungeons = false, pclaude = false,   -- shared plan is opt-in
-  hideCombat = true,
+  hideCombat = true, fade = false,
 }
 local LABELS = {
   { "Personal" },
@@ -31,7 +31,7 @@ local LABELS = {
   { "Party" },
   { "pshare", "Quests to share" }, { "pquests", "Shared quests in order" }, { "pupkeep", "Party repair and bags" },
   { "pgear", "Gear check" }, { "pdungeons", "Dungeons everyone wants" },
-  { "Window" }, { "hideCombat", "Hide in combat" },
+  { "Window" }, { "hideCombat", "Hide in combat" }, { "fade", "Fade when your mouse is not on it" },
 }
 
 local function db()
@@ -530,7 +530,7 @@ local function makeSettings()
       insets = { left = 3, right = 3, top = 3, bottom = 3 } })
     settings:SetBackdropColor(0.05, 0.04, 0.03, 0.95); settings:SetBackdropBorderColor(0.9, 0.72, 0.4, 0.9)
   end
-  local t = settings:CreateFontString(nil, "OVERLAY", "GameFontNormal"); t:SetPoint("TOPLEFT", 12, -10); t:SetText("What to track")
+  local t = settings:CreateFontString(nil, "OVERLAY", "GameFontNormal"); t:SetPoint("TOPLEFT", 12, -10); t:SetText("Options")
   local y = -32
   local hasCT = ClaudeTasks_List ~= nil or (ctasks and ctasks.id ~= nil)
   local shown = {}
@@ -545,7 +545,14 @@ local function makeSettings()
       local cb = CreateFrame("CheckButton", nil, settings, "UICheckButtonTemplate")
       cb:SetSize(20, 20); cb:SetPoint("TOPLEFT", 10, y + 2)
       cb:SetChecked(opt(l[1]) and true or false)
-      cb:SetScript("OnClick", function(self) db().opts[l[1]] = self:GetChecked() and true or false; ns.trackerRefresh() end)
+      cb:SetScript("OnClick", function(self)
+        db().opts[l[1]] = self:GetChecked() and true or false
+        if l[1] == "hideCombat" and frame and InCombatLockdown and InCombatLockdown() then
+          if opt("hideCombat") then frame:Hide() elseif db().shown then frame:Show() end
+        end
+        if l[1] == "fade" and ns.trackerFade then ns.trackerFade() end
+        ns.trackerRefresh()
+      end)
       local lab = settings:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall"); lab:SetPoint("LEFT", cb, "RIGHT", 2, 0); lab:SetText(l[2])
     end
     y = y - 20
@@ -578,7 +585,7 @@ local function build()
   end
   local gear = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate"); gear:SetSize(22, 18); gear:SetPoint("TOPRIGHT", -30, -6); gear:SetText("*")
   gear:SetScript("OnClick", function() if not settings then makeSettings() end; settings:SetShown(not settings:IsShown()) end)
-  gear:SetScript("OnEnter", function(b) GameTooltip:SetOwner(b, "ANCHOR_TOP"); GameTooltip:SetText("What to track"); GameTooltip:Show() end)
+  gear:SetScript("OnEnter", function(b) GameTooltip:SetOwner(b, "ANCHOR_TOP"); GameTooltip:SetText("Options"); GameTooltip:AddLine("What to track, fade, hide in combat", 1, 1, 1); GameTooltip:Show() end)
   gear:SetScript("OnLeave", function() GameTooltip:Hide() end)
   local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton"); close:SetSize(24, 24); close:SetPoint("TOPRIGHT", 2, 2)
   close:SetScript("OnClick", function() db().shown = false; frame:Hide(); if settings then settings:Hide() end end)
@@ -600,6 +607,25 @@ local function build()
     r.text:SetPoint("TOPLEFT", 12, y - 2); r.text:SetJustifyH("LEFT"); r.text:SetWordWrap(false)
     rows[i] = r
   end
+end
+
+-- fade: see-through until your mouse is over the window (or its options)
+local FADED = 0.35
+local fadeTick
+ns.trackerFade = function()
+  if not frame then return end
+  if not opt("fade") then
+    if fadeTick then fadeTick:Cancel(); fadeTick = nil end
+    frame:SetAlpha(1); return
+  end
+  if fadeTick or not (C_Timer and C_Timer.NewTicker) then return end
+  fadeTick = C_Timer.NewTicker(0.15, function()
+    if not frame or not frame:IsShown() then return end
+    local over = (MouseIsOver and MouseIsOver(frame)) or (settings and settings:IsShown() and MouseIsOver and MouseIsOver(settings))
+    local want = over and 1 or FADED
+    local a = frame:GetAlpha()
+    if math.abs(a - want) > 0.01 then frame:SetAlpha(a + (want - a) * 0.5) end
+  end)
 end
 
 -- quest log tracking (the same watch list shift-click in the quest log uses)
@@ -687,6 +713,7 @@ ns.openTracker = function(tab)
   if tab then c.tab = tab end
   c.shown = true
   if not (opt("hideCombat") and InCombatLockdown and InCombatLockdown()) then frame:Show() end
+  ns.trackerFade()
   pcall(render)
 end
 ns.toggleTracker = function()
