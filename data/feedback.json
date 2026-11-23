@@ -44,7 +44,7 @@
    "src": "discord 1573729899305373867"
   },
   {
-   "who": "medi",
+   "who": "Blexas",
    "kind": "feature",
    "title": "Sell junk without selling swap gear",
    "status": "shipped",
@@ -53,7 +53,7 @@
    "src": "in game request"
   },
   {
-   "who": "John",
+   "who": "jspaceman",
    "kind": "feature",
    "title": "Soul Shard cleanup button",
    "status": "shipped",
@@ -113,5 +113,12 @@
   "1574199390128709854",
   "1574199838046814270"
  ],
- "discord_logged_keep": {}
+ "discord_logged_keep": {},
+ "aliases": {
+  "medi": "Blexas",
+  "John": "jspaceman",
+  "Jay": "jspaceman",
+  "Jay Spaceman": "jspaceman",
+  "Blexas Talafreako": "Blexas"
+ }
 }

@@ -79,7 +79,8 @@ forum post (https://discord.com/channels/1568419835799543808/1572061287817547899
 
 1. **Log.** For every message from a person (not an APP/webhook post) whose id is not already in
    `data/feedback.json` (`items[].src`, `discord_done`, `discord_logged_keep`), decide what it is:
-   - a bug report or a feature request: add an item `{who, kind: bug|feature, title (short, plain), status: queued,
+   - a bug report or a feature request (use the person's main name from `aliases` in `data/feedback.json`: Kris
+     said Nov 22 that medi is Blexas and John is jspaceman; add new alts there when Kris names them): add an item `{who, kind: bug|feature, title (short, plain), status: queued,
      date, src: "discord <id>"}`. `who` is the Discord display name's first word as people know it.
    - chatter, thanks, a question, a GIF: nothing to log.
    - a troll: see Dunce corner.

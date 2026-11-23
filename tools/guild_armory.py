@@ -251,7 +251,7 @@ def render(data, min_panels=0):
         except Exception: fb = {}
         cred = {}
         for it in fb.get('items', []):
-            who = (it.get('who') or '').strip()
+            who = (it.get('who') or '').strip(); who = (fb.get('aliases') or {}).get(who, who)   # one person, one name
             if not who or it.get('status') == 'declined': continue
             c = cred.setdefault(who, {'shipped': 0, 'queued': 0})
             c['shipped' if it.get('status') == 'shipped' else 'queued'] += 1
@@ -274,7 +274,7 @@ def render(data, min_panels=0):
         if not crew: text(d, ((x0 + x1) // 2, y0 + 130), 'report a bug in #guild-board', F(14, 'Medium'), MUTE, 'mm')
         # dunce corner: painted goblin, name on the wood, gone after 7 days
         dy0 = split + 12; red = (210, 70, 50)
-        dun = [x for x in fb.get('dunce', []) if now - x.get('at', 0) < 7 * 86400]
+        dun = [dict(x, who=(fb.get('aliases') or {}).get(x.get('who'), x.get('who'))) for x in fb.get('dunce', []) if now - x.get('at', 0) < 7 * 86400]
         dun.sort(key=lambda x: -x.get('at', 0))
         art_p = os.path.join(HERE, 'art', 'dunce_goblin.png')
         bw, bh = x1 - x0, y1 - dy0
