@@ -288,15 +288,24 @@ def render(data, min_panels=0):
             m = Image.new('L', (bw, bh), 0); ImageDraw.Draw(m).rounded_rectangle([0, 0, bw - 1, bh - 1], 10, fill=255)
             im.paste(g, (x0, dy0), m)
         ov = Image.new('RGBA', im.size, (0, 0, 0, 0)); od = ImageDraw.Draw(ov)
-        od.rectangle([x0, dy0, x1, dy0 + 46], fill=(8, 5, 3, 170)); od.rectangle([x0, y1 - 62, x1, y1], fill=(8, 5, 3, 185))
+        band = 62 if len(dun) < 2 else 92
+        od.rectangle([x0, dy0, x1, dy0 + 46], fill=(8, 5, 3, 170)); od.rectangle([x0, y1 - band, x1, y1], fill=(8, 5, 3, 195))
         od.rounded_rectangle([x0, dy0, x1, y1], 10, outline=red + (200,), width=2)
         im = Image.alpha_composite(im, ov); d = ImageDraw.Draw(im)
         text(d, (x0 + 16, dy0 + 23), 'DUNCE CORNER', F(18, 'Bold'), red)
-        if dun:
-            others = 'with ' + ', '.join(x.get('who', '?') for x in dun[1:]) if len(dun) > 1 else 'this week'
-            text(d, (x1 - 16, dy0 + 23), fit(d, others, F(12, 'Medium'), bw - 190), F(12, 'Medium'), GOLD if len(dun) > 1 else MUTE, 'rm')
+        if len(dun) == 1:
+            text(d, (x1 - 16, dy0 + 23), 'this week', F(12, 'Medium'), MUTE, 'rm')
             text(d, ((x0 + x1) // 2, y1 - 42), fit(d, dun[0].get('who', '?'), F(24, 'Bold'), bw - 30), F(24, 'Bold'), TXT, 'mm')
             text(d, ((x0 + x1) // 2, y1 - 16), fit(d, dun[0].get('why', ''), F(12, 'Medium'), bw - 24), F(12, 'Medium'), GOLD, 'mm')
+        elif dun:
+            # everyone gets called out: two rows of name + crime, newest first, then "+N more"
+            shown = dun[:2]; rest = len(dun) - len(shown)
+            text(d, (x1 - 16, dy0 + 23), f"{len(dun)} this week", F(12, 'Medium'), MUTE, 'rm')
+            for k, x in enumerate(shown):
+                ry = y1 - band + 8 + k * 40
+                text(d, (x0 + 14, ry + 9), fit(d, x.get('who', '?'), F(18, 'Bold'), bw - 28), F(18, 'Bold'), TXT)
+                text(d, (x0 + 14, ry + 28), fit(d, x.get('why', ''), F(11, 'Medium'), bw - 28), F(11, 'Medium'), GOLD)
+            if rest > 0: text(d, (x1 - 14, y1 - band + 17), f"+{rest} more", F(12, 'Medium'), MUTE, 'rm')
         else:
             text(d, ((x0 + x1) // 2, y1 - 40), 'Empty. Keep it that way.', F(17, 'Bold'), TXT, 'mm')
             text(d, ((x0 + x1) // 2, y1 - 17), 'troll requests earn the hat', F(12, 'Medium'), MUTE, 'mm')
