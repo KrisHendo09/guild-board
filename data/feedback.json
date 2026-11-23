@@ -78,6 +78,14 @@
    "date": "2026-11-19",
    "src": "discord 1573150839588266076",
    "version": "board fix"
+  },
+  {
+   "who": "Blexas",
+   "kind": "feature",
+   "title": "Sell junk whites vendor button",
+   "status": "queued",
+   "date": "2026-11-23",
+   "src": "discord 1574565206405812235"
   }
  ],
  "dunce": [
@@ -111,9 +119,17 @@
   "1574199140936712223",
   "1574199175434997892",
   "1574199390128709854",
-  "1574199838046814270"
+  "1574199838046814270",
+  "1574198050157764621",
+  "1574199573923106988",
+  "1574200193908215970"
  ],
- "discord_logged_keep": {},
+ "discord_logged_keep": {
+  "1574565206405812235": "logged 2026-11-23, delete on next run",
+  "1574565029804642451": "logged 2026-11-23, delete on next run",
+  "1574565143142998229": "logged 2026-11-23, delete on next run",
+  "1574565270985646193": "logged 2026-11-23, delete on next run"
+ },
  "aliases": {
   "medi": "Blexas",
   "John": "jspaceman",
