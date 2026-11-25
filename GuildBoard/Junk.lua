@@ -233,6 +233,11 @@ local function buttonPos(f)
   if type(b) ~= "number" or not f.GetID then return end
   return b, f:GetID()
 end
+-- Some frames answer IsObjectType/IsVisible with a secret value that errors when tested, so test inside pcall.
+local function shownButton(f)
+  if f.IsObjectType and f:IsObjectType("Button") and f:IsVisible() then return true end
+  return false
+end
 local function mark()
   clearMarks()
   if #list == 0 then return end
@@ -240,7 +245,8 @@ local function mark()
   for _, e in ipairs(list) do want[e.b .. ":" .. e.s] = true end
   local f = EnumerateFrames()
   while f do
-    if f.IsObjectType and f:IsObjectType("Button") and f:IsVisible() then
+    local okShown, shown = pcall(shownButton, f)
+    if okShown and shown then
       local ok, b, s = pcall(buttonPos, f)
       if ok and b and s and want[b .. ":" .. s] then
         if not f.gbJunk then
