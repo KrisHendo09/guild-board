@@ -1,6 +1,6 @@
 {
  "note": "Who has the Guild Board addon, as seen by the exporter's copy of the addon in the last 30 days.",
- "updated": 1795563994,
+ "updated": 1795650452,
  "users": {
   "Ahh": {
    "class": "Mage",
@@ -11,7 +11,7 @@
   "Blexas": {
    "class": "Hunter",
    "level": 29,
-   "seen": 1795486720,
+   "seen": 1795583749,
    "version": "1.6.0"
   },
   "Bubblegum": {
@@ -22,8 +22,8 @@
   },
   "Daddy": {
    "class": "Shaman",
-   "level": 28,
-   "seen": 1795496665,
+   "level": 29,
+   "seen": 1795586407,
    "version": "1.6.0"
   },
   "Damus": {
@@ -34,20 +34,26 @@
   },
   "Datcat": {
    "class": "Paladin",
-   "level": 28,
-   "seen": 1795496598,
+   "level": 29,
+   "seen": 1795580510,
+   "version": "1.6.0"
+  },
+  "Deadward": {
+   "class": "Priest",
+   "level": 10,
+   "seen": 1795586129,
    "version": "1.6.0"
   },
   "Doggie": {
    "class": "Warrior",
    "level": 19,
-   "seen": 1795490730,
+   "seen": 1795582186,
    "version": "1.6.0"
   },
   "Dr": {
    "class": "Priest",
    "level": 14,
-   "seen": 1795414909,
+   "seen": 1795587045,
    "version": "1.6.0"
   },
   "Houston": {
@@ -58,26 +64,26 @@
   },
   "Jay": {
    "class": "Warlock",
-   "level": 28,
-   "seen": 1795488449,
-   "version": "1.5.1"
+   "level": 29,
+   "seen": 1795580505,
+   "version": "1.6.0"
   },
   "Kittylilith": {
    "class": "Druid",
    "level": 20,
-   "seen": 1795497333,
+   "seen": 1795499133,
    "version": "1.6.0"
   },
   "Miss": {
    "class": "Druid",
    "level": 18,
-   "seen": 1795405850,
+   "seen": 1795545310,
    "version": "1.6.0"
   },
   "Plsona": {
    "class": "Paladin",
-   "level": 36,
-   "seen": 1795491766,
+   "level": 37,
+   "seen": 1795575936,
    "version": "1.5.1"
   },
   "Poplock": {

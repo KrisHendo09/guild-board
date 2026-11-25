@@ -86,6 +86,22 @@
    "status": "queued",
    "date": "2026-11-23",
    "src": "discord 1574565206405812235"
+  },
+  {
+   "who": "jspaceman",
+   "kind": "feature",
+   "title": "Sell junk never sells your skinning knife",
+   "status": "queued",
+   "date": "2026-11-24",
+   "src": "discord 1575002324253020271"
+  },
+  {
+   "who": "Blexas",
+   "kind": "feature",
+   "title": "Reagent deposit leaves Simple Wood alone",
+   "status": "queued",
+   "date": "2026-11-24",
+   "src": "discord 1575002598417891399"
   }
  ],
  "dunce": [
@@ -100,6 +116,12 @@
    "why": "wanted everyone's mail sent to him",
    "at": 1795388913,
    "src": "discord 1574199838046814270"
+  },
+  {
+   "who": "jspaceman",
+   "why": "asked us to make his game lag",
+   "at": 1795580288,
+   "src": "discord 1575002627983540239"
   }
  ],
  "discord_done": [
@@ -122,14 +144,17 @@
   "1574199838046814270",
   "1574198050157764621",
   "1574199573923106988",
-  "1574200193908215970"
+  "1574200193908215970",
+  "1574565206405812235",
+  "1574565029804642451",
+  "1574565143142998229",
+  "1574565270985646193",
+  "1575002324253020271",
+  "1575002598417891399",
+  "1575002627983540239",
+  "1575002634794836123"
  ],
- "discord_logged_keep": {
-  "1574565206405812235": "logged 2026-11-23, delete on next run",
-  "1574565029804642451": "logged 2026-11-23, delete on next run",
-  "1574565143142998229": "logged 2026-11-23, delete on next run",
-  "1574565270985646193": "logged 2026-11-23, delete on next run"
- },
+ "discord_logged_keep": {},
  "aliases": {
   "medi": "Blexas",
   "John": "jspaceman",
