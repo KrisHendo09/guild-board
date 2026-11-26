@@ -1,6 +1,6 @@
 {
  "note": "Who has the Guild Board addon, as seen by the exporter's copy of the addon in the last 30 days.",
- "updated": 1795650452,
+ "updated": 1795665903,
  "users": {
   "Ahh": {
    "class": "Mage",
@@ -53,7 +53,7 @@
   "Dr": {
    "class": "Priest",
    "level": 14,
-   "seen": 1795587045,
+   "seen": 1795662634,
    "version": "1.6.0"
   },
   "Houston": {
@@ -64,8 +64,8 @@
   },
   "Jay": {
    "class": "Warlock",
-   "level": 29,
-   "seen": 1795580505,
+   "level": 30,
+   "seen": 1795660859,
    "version": "1.6.0"
   },
   "Kittylilith": {

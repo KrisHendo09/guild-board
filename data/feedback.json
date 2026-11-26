@@ -102,6 +102,14 @@
    "status": "queued",
    "date": "2026-11-24",
    "src": "discord 1575002598417891399"
+  },
+  {
+   "who": "bigbadjace",
+   "kind": "feature",
+   "title": "Tank auto skull mark and target callout",
+   "status": "queued",
+   "date": "2026-11-25",
+   "src": "discord 1575360042688057429"
   }
  ],
  "dunce": [
@@ -154,7 +162,13 @@
   "1575002627983540239",
   "1575002634794836123"
  ],
- "discord_logged_keep": {},
+ "discord_logged_keep": {
+  "1575360042688057429": "logged 2026-11-25 evening, delete on a later run",
+  "1575360109813563413": "logged 2026-11-25 evening, delete on a later run",
+  "1575360419030245529": "logged 2026-11-25 evening, delete on a later run",
+  "1575360690561228941": "logged 2026-11-25 evening, delete on a later run",
+  "1575361192040595518": "logged 2026-11-25 evening, delete on a later run"
+ },
  "aliases": {
   "medi": "Blexas",
   "John": "jspaceman",
