@@ -1,12 +1,18 @@
 {
  "note": "Who has the Guild Board addon, as seen by the exporter's copy of the addon in the last 30 days.",
- "updated": 1795665903,
+ "updated": 1795736726,
  "users": {
   "Ahh": {
    "class": "Mage",
    "level": 11,
    "seen": 1795214964,
    "version": "1.3.0"
+  },
+  "Bb": {
+   "class": "Warrior",
+   "level": 34,
+   "seen": 1795674840,
+   "version": "1.6.0"
   },
   "Blexas": {
    "class": "Hunter",
@@ -23,7 +29,7 @@
   "Daddy": {
    "class": "Shaman",
    "level": 29,
-   "seen": 1795586407,
+   "seen": 1795736157,
    "version": "1.6.0"
   },
   "Damus": {
@@ -52,8 +58,8 @@
   },
   "Dr": {
    "class": "Priest",
-   "level": 14,
-   "seen": 1795662634,
+   "level": 15,
+   "seen": 1795674716,
    "version": "1.6.0"
   },
   "Houston": {

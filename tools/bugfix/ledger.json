@@ -17,7 +17,7 @@
    "status": "needs-kris",
    "shipped": null,
    "date": "2026-11-25",
-   "note": "Real bug in released code, seen by three guildies. mark() tests IsObjectType/IsVisible on every frame and some return a secret boolean. Fix (8 lines, pcall around the test) passed the smoke test and a lupa repro and sits on branch patrol/junk-secret-value-fix. Not released: main holds unreleased feature work since 1.6.0, so a hotfix cut from main would break the 60 line and toc gates and ship features. Do not release this from the patrol until Kris says how."
+   "note": "Real bug in released code, seen by four guildies as of 2026-11-26. mark() tests IsObjectType/IsVisible on every frame and some return a secret boolean. Fix (8 lines, pcall around the test) passed the smoke test and a lupa repro and sits on branch patrol/junk-secret-value-fix. Not released: main holds unreleased feature work since 1.6.0, so a hotfix cut from main would break the 60 line and toc gates and ship features. Do not release this from the patrol until Kris says how."
   }
  ]
 }

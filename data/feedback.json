@@ -130,6 +130,12 @@
    "why": "asked us to make his game lag",
    "at": 1795580288,
    "src": "discord 1575002627983540239"
+  },
+  {
+   "who": "jspaceman",
+   "why": "asked for a rude ASCII ilvl gauge",
+   "at": 1795707801,
+   "src": "discord 1575537454050705550"
   }
  ],
  "discord_done": [
@@ -160,14 +166,19 @@
   "1575002324253020271",
   "1575002598417891399",
   "1575002627983540239",
-  "1575002634794836123"
+  "1575002634794836123",
+  "1575360042688057429",
+  "1575361192040595518"
  ],
  "discord_logged_keep": {
-  "1575360042688057429": "logged 2026-11-25 evening, delete on a later run",
   "1575360109813563413": "logged 2026-11-25 evening, delete on a later run",
   "1575360419030245529": "logged 2026-11-25 evening, delete on a later run",
   "1575360690561228941": "logged 2026-11-25 evening, delete on a later run",
-  "1575361192040595518": "logged 2026-11-25 evening, delete on a later run"
+  "1575537454050705550": "logged 2026-11-26, delete on a later run",
+  "1575607433370533969": "logged 2026-11-26, delete on a later run",
+  "1575607518716231782": "logged 2026-11-26, delete on a later run",
+  "1575607568217149481": "logged 2026-11-26, delete on a later run",
+  "1575607951383593011": "logged 2026-11-26, delete on a later run"
  },
  "aliases": {
   "medi": "Blexas",
